@@ -1,0 +1,4 @@
+pandaset@git+https://github.com/scaleapi/pandaset-devkit@59be180e2a3f3e37f6d66af9e67bf944ccbf6ec0#subdirectory=python
+rosbags==0.9.15
+rich
+scipy

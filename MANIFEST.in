@@ -1,0 +1,7 @@
+include pandaset2bag/py.typed
+include pandaset2bag/VERSION
+include pandaset2bag/visualization_msgs/Marker.msg
+include pandaset2bag/visualization_msgs/MeshFile.msg
+include pandaset2bag/visualization_msgs/UVCoordinate.msg
+include pandaset2bag/visualization_msgs/LICENSE
+inlcude LICENSE
