@@ -19,12 +19,12 @@ repos:
     hooks:
       - id: black
   - repo: https://github.com/pre-commit/mirrors-mypy
-    rev: v1.1.1
+    rev: v1.2.0
     hooks:
       - id: mypy
         args: [--config-file=./pyproject.toml]
         additional_dependencies: [rosbags==0.9.15]
   - repo: https://github.com/charliermarsh/ruff-pre-commit
-    rev: v0.0.260
+    rev: v0.0.269
     hooks:
       - id: ruff
