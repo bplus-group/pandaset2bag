@@ -30,7 +30,6 @@ from io import BytesIO
 
 if typing.TYPE_CHECKING:
     from pathlib import Path
-    from typing import List, Optional, Tuple, Union
 
     from pandaset.sequence import Sequence
     from rosbags.interfaces import Connection
@@ -55,7 +54,6 @@ if os.getenv('UPDATED_VISUALIZATION_MSG_MARKER', 'false').lower() == 'true':
     print('[gold1]█████[/gold1] Using [bold]UPDATED[/bold] visualization_msgs')
 else:
     print('[gold1]█████[/gold1] Using [bold]DEFAULT[/bold] visualization_msgs')
-
 from rosbags.rosbag2 import Writer
 from rosbags.serde import serialize_cdr
 from rosbags.typesys.types import builtin_interfaces__msg__Duration as Duration
@@ -106,7 +104,7 @@ from .utils import (
 class PandaSet2BagConverter:  # noqa: D101
     EGO_NAMESPACE = '/panda/ego_vehicle'
 
-    def __init__(self, dataset_dir: Union[Path, str]):
+    def __init__(self, dataset_dir: Path | str):
         """Initialize a PandaSet2BagConverter instance.
 
         Args:
@@ -121,7 +119,7 @@ class PandaSet2BagConverter:  # noqa: D101
         self._sequence: Sequence
         self._rosbag_writer: Writer
 
-        self._max_imgsz: Optional[Tuple[int, int]] = None
+        self._max_imgsz: tuple[int, int] | None = None
         self._image_convert_type: ImageConvertType = ImageConvertType.RAW
         self._image_format: CompressedImageFormat = CompressedImageFormat.JPEG
         self._jpeg_quality: int = 75
@@ -131,7 +129,7 @@ class PandaSet2BagConverter:  # noqa: D101
         self._save_cuboids_df: bool = False
 
     @property
-    def max_image_size(self) -> Optional[Tuple[int, int]]:
+    def max_image_size(self) -> tuple[int, int] | None:
         """Maximum image size to convert to.
 
         Returns
@@ -143,7 +141,7 @@ class PandaSet2BagConverter:  # noqa: D101
         return self._max_imgsz
 
     @max_image_size.setter
-    def max_image_size(self, value: Optional[Tuple[int, int]]) -> None:
+    def max_image_size(self, value: tuple[int, int] | None) -> None:
         if value:
             self._max_imgsz = value
 
@@ -581,8 +579,8 @@ class PandaSet2BagConverter:  # noqa: D101
                 path = self._rosbag_writer.path
                 save_cuboid_data_frame(df, path, f'{str(idx).zfill(2)}.pkl.gz')
 
-            markers: List[Marker] = []
-            marker_ids: List[str] = []
+            markers: list[Marker] = []
+            marker_ids: list[str] = []
 
             sec, nsec = split_unix_timestamp(timestamp)
 
@@ -780,7 +778,7 @@ class PandaSet2BagConverter:  # noqa: D101
         for lidar_id in LidarIdentifier:
             self._generate_stamped_transform_lidar(lidar_id, tf_connection)
 
-    def convert(self, sequence_id: str, path: Union[Path, str] = '') -> None:
+    def convert(self, sequence_id: str, path: Path | str = '') -> None:
         """Convert a sequence from the PandaSet to a rosbag file.
 
         Args:

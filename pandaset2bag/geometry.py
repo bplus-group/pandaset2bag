@@ -28,8 +28,6 @@ import typing
 from typing import Dict, NewType
 
 if typing.TYPE_CHECKING:
-    from typing import List, Optional, Tuple
-
     import numpy.typing as npt
     from pandas import DataFrame
     from pandaset.sensors import Intrinsics
@@ -89,8 +87,8 @@ T2Norm[2, :3] = [0, 0, 1]
 
 def get_flatten_calibration_matrices(
     intrinsics: Intrinsics,
-    imgsz: Optional[Tuple[int, int]] = None,
-) -> Tuple[
+    imgsz: tuple[int, int] | None = None,
+) -> tuple[
     npt.NDArray[np.float64],
     npt.NDArray[np.float64],
     npt.NDArray[np.float64],
@@ -293,8 +291,8 @@ def pose_to_normative(pose: Pose) -> Pose:
 
 
 def heading_position_to_mat(
-    heading: List[float],
-    position: List[float],
+    heading: list[float],
+    position: list[float],
 ) -> npt.NDArray[np.float64]:
     """Get the homogenous matrix from a given rotation and translation.
 

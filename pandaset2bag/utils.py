@@ -27,8 +27,6 @@ from __future__ import annotations
 import typing
 
 if typing.TYPE_CHECKING:
-    from typing import Dict, List, Tuple, Union
-
     from pandas import DataFrame
     from pandas._typing import CompressionOptions, JSONSerializable
 
@@ -122,7 +120,7 @@ def format_lidar_name_from_id(lidar_id: LidarIdentifier) -> str:
     return lidar_name
 
 
-def split_unix_timestamp(timestamp: float) -> Tuple[int, int]:
+def split_unix_timestamp(timestamp: float) -> tuple[int, int]:
     """Split UNIX timestamp into seconds and nanoseconds.
 
     Args:
@@ -142,7 +140,7 @@ def split_unix_timestamp(timestamp: float) -> Tuple[int, int]:
     return (sec, nsec)
 
 
-def get_default_lidar_point_fields() -> Tuple[List[PointField], int]:
+def get_default_lidar_point_fields() -> tuple[list[PointField], int]:
     """Get default fields for LIDAR point clouds.
 
     Returns a list of default `PointField` objects representing the standard
@@ -178,7 +176,7 @@ def get_default_lidar_point_fields() -> Tuple[List[PointField], int]:
 
 
 def to_json_with_schema(
-    schema: Dict[str, JSONSerializable],
+    schema: dict[str, JSONSerializable],
     df_json_record: str,
 ) -> str:
     """Convert a JSON-encoded record to a JSON string including schema.
@@ -204,7 +202,7 @@ def to_json_with_schema(
 
 def save_cuboid_data_frame(
     df: DataFrame,
-    path: Union[Path, str],
+    path: Path | str,
     filename: str,
     compression: CompressionOptions = 'gzip',
 ) -> None:
