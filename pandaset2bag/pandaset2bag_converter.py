@@ -299,7 +299,7 @@ class PandaSet2BagConverter:  # noqa: D101
             message = Image(
                 Header(
                     stamp=Time(sec=sec, nanosec=nsec),
-                    frame_id=get_frame_id_from_topic(conn.topic, suffix='/image'),
+                    frame_id=get_frame_id_from_topic(conn.topic, suffix='/image')[1:],
                 ),
                 height=img.height,
                 width=img.width,
@@ -355,7 +355,7 @@ class PandaSet2BagConverter:  # noqa: D101
                     frame_id=get_frame_id_from_topic(
                         conn.topic,
                         suffix='/image/compressed',
-                    ),
+                    )[1:],
                 ),
                 format=self.image_format.value,
                 data=np.frombuffer(buffer.getvalue(), dtype=np.uint8),
@@ -395,7 +395,9 @@ class PandaSet2BagConverter:  # noqa: D101
             message = CameraInfo(
                 Header(
                     stamp=Time(sec=sec, nanosec=nsec),
-                    frame_id=get_frame_id_from_topic(conn.topic, suffix='/camera_info'),
+                    frame_id=get_frame_id_from_topic(conn.topic, suffix='/camera_info')[
+                        1:
+                    ],
                 ),
                 height=img.height,
                 width=img.width,
@@ -466,7 +468,7 @@ class PandaSet2BagConverter:  # noqa: D101
             message = NavSatFix(
                 Header(
                     stamp=Time(sec=sec, nanosec=nsec),
-                    frame_id=get_frame_id_from_topic(conn.topic),
+                    frame_id=get_frame_id_from_topic(conn.topic)[1:],
                 ),
                 NavSatStatus(status=0, service=0),
                 latitude=gps['lat'],
@@ -526,7 +528,7 @@ class PandaSet2BagConverter:  # noqa: D101
             message = PointCloud2(
                 Header(
                     stamp=Time(sec=sec, nanosec=nsec),
-                    frame_id=get_frame_id_from_topic(conn.topic),
+                    frame_id=get_frame_id_from_topic(conn.topic)[1:],
                 ),
                 height=1,
                 width=frame_width,
