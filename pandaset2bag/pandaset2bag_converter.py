@@ -75,6 +75,9 @@ from rosbags.typesys.types import sensor_msgs__msg__PointCloud2 as PointCloud2
 from rosbags.typesys.types import sensor_msgs__msg__RegionOfInterest as RegionOfInterest
 from rosbags.typesys.types import std_msgs__msg__ColorRGBA as ColorRGBA
 from rosbags.typesys.types import std_msgs__msg__Header as Header
+from rosbags.typesys.types import (
+    tf2_msgs__msg__TFMessage as TFMessage,
+)
 from rosbags.typesys.types import visualization_msgs__msg__Marker as Marker
 from rosbags.typesys.types import visualization_msgs__msg__MarkerArray as MarkerArray
 from scipy.spatial.transform import Rotation as R  # noqa: N817
@@ -657,7 +660,7 @@ class PandaSet2BagConverter:  # noqa: D101
             sec, nsec = split_unix_timestamp(timestamp)
             pose_norm_ego = ego_vehicle_to_normative_ego(pose)
 
-            message = TransformStamped(
+            transforms = TransformStamped(
                 header=Header(stamp=Time(sec=sec, nanosec=nsec), frame_id='world'),
                 child_frame_id=get_frame_id_from_topic(self.EGO_NAMESPACE)[1:],
                 transform=Transform(
@@ -674,6 +677,8 @@ class PandaSet2BagConverter:  # noqa: D101
                     ),
                 ),
             )
+
+            message = TFMessage(transforms=[transforms])
 
             self._rosbag_writer.write(
                 connection,
@@ -695,7 +700,7 @@ class PandaSet2BagConverter:  # noqa: D101
             sec, nsec = split_unix_timestamp(timestamp)
             frame_id = get_frame_id_from_topic(self.EGO_NAMESPACE)[1:]
 
-            message = TransformStamped(
+            transforms = TransformStamped(
                 header=Header(stamp=Time(sec=sec, nanosec=nsec), frame_id=frame_id),
                 child_frame_id=f'{frame_id}/{lidar_name}',
                 transform=Transform(
@@ -712,6 +717,8 @@ class PandaSet2BagConverter:  # noqa: D101
                     ),
                 ),
             )
+
+            message = TFMessage(transforms=[transforms])
 
             self._rosbag_writer.write(
                 connection,
@@ -742,7 +749,7 @@ class PandaSet2BagConverter:  # noqa: D101
             pose = mat_encoded_as_pose(T_camera_lidar)
             pose_norm = pose_to_normative(pose)
 
-            message = TransformStamped(
+            transforms = TransformStamped(
                 header=Header(stamp=Time(sec=sec, nanosec=nsec), frame_id=frame_id),
                 child_frame_id=f'{frame_id}/{camera_id}',
                 transform=Transform(
@@ -760,6 +767,8 @@ class PandaSet2BagConverter:  # noqa: D101
                 ),
             )
 
+            message = TFMessage(transforms=[transforms])
+
             self._rosbag_writer.write(
                 connection,
                 timestamp * 1e9,
@@ -769,7 +778,7 @@ class PandaSet2BagConverter:  # noqa: D101
     def _convert_tf_sensors(self) -> None:
         tf_connection: Connection = self._rosbag_writer.add_connection(
             '/tf',
-            TransformStamped.__msgtype__,
+            TFMessage.__msgtype__,
         )
 
         self._generate_stamped_transform_ego_vehicle(tf_connection)
