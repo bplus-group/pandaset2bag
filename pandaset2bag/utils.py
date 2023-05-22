@@ -94,8 +94,8 @@ def get_frame_id_from_topic(topic: str, root: str = '/panda', suffix: str = '') 
     ValueError:
         If the `root` or `suffix` strings are not found in the topic name.
     """
-    topic = topic[len(root) :] if topic.startswith(root) else topic
-    return topic[: -len(suffix)] if topic.endswith(suffix) else topic
+    topic = topic[len(root) :] if root and topic.startswith(root) else topic
+    return topic[: -len(suffix)] if suffix and topic.endswith(suffix) else topic
 
 
 def format_lidar_name_from_id(lidar_id: LidarIdentifier) -> str:
