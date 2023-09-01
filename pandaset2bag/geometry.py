@@ -115,16 +115,16 @@ def get_flatten_calibration_matrices(
         the distortion, intrinsic, rotation, and projection matrices
         respectively.
     """
-    d = np.zeros((5,), dtype=np.float64)  # distortion
+    d: npt.NDArray[np.float64] = np.zeros((5,), dtype=np.float64)  # distortion
 
     #     [fx   0  cx]
     # K = [ 0  fy  cy]
     #     [ 0   0   1]
-    K = np.identity(3, dtype=np.float64)  # intrinsic
+    K: npt.NDArray[np.float64] = np.identity(3, dtype=np.float64)  # intrinsic
     K[0, [0, 2]] = [intrinsics.fx, intrinsics.cx]
     K[1, [1, 2]] = [intrinsics.fy, intrinsics.cy]
 
-    R = np.identity(3, dtype=np.float64)  # rotation
+    R: npt.NDArray[np.float64] = np.identity(3, dtype=np.float64)  # rotation
 
     # all cameras in the dataset have the same image size
     org_imgsz = (1080, 1920)

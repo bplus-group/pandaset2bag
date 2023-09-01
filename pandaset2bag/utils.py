@@ -115,9 +115,7 @@ def format_lidar_name_from_id(lidar_id: LidarIdentifier) -> str:
         The formatted name of the Lidar.
     """
     lidar_name = lidar_id.name.lower().replace('_', '')
-    lidar_name = lidar_name[:-2] + lidar_name[-2:].upper()
-
-    return lidar_name
+    return lidar_name[:-2] + lidar_name[-2:].upper()
 
 
 def split_unix_timestamp(timestamp: float) -> tuple[int, int]:
