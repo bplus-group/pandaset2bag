@@ -142,6 +142,13 @@ def parse_arguments() -> Namespace:
         help='compression mode for rosbag file.',
     )
     parser.add_argument(
+        '-p',
+        '--profiles',
+        default='',
+        type=str,
+        help='QoS profiles filepath (YAML) to be offered for published topics.',
+    )
+    parser.add_argument(
         '-c',
         '--cuboids',
         action='store_true',
@@ -188,6 +195,7 @@ def main() -> int:
         converter.png_compress_level = args.png_compress_level
         converter.png_optimize = args.png_optimize
         converter.compression_mode = compression_mode
+        converter.offered_qos_profiles = args.profiles
         converter.save_cuboids_df = args.cuboids
 
         converter.convert(args.sequence_id.zfill(3), args.output)

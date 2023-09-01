@@ -27,9 +27,12 @@ from __future__ import annotations
 import os
 import typing
 from io import BytesIO
+from pathlib import Path
+
+import yaml
 
 if typing.TYPE_CHECKING:
-    from pathlib import Path
+    from typing import Any
 
     from pandaset.sequence import Sequence
     from rosbags.interfaces import Connection
@@ -129,6 +132,7 @@ class PandaSet2BagConverter:  # noqa: D101
         self._png_compress_level: int = 6
         self._png_optimize: bool = False
         self._compression_mode = Writer.CompressionMode.NONE
+        self._offered_qos_profiles: dict[str, Any] = {}
         self._save_cuboids_df: bool = False
 
     @property
@@ -257,6 +261,26 @@ class PandaSet2BagConverter:  # noqa: D101
         self._compression_mode = value
 
     @property
+    def offered_qos_profiles(self) -> dict[str, Any]:
+        """QoS profile to be offered for published topics.
+
+        Returns
+        -------
+        dict[str, Any]:
+            QoS profiles represented as a dict.
+            Default is '', i.e no QoS profiles offered.
+        """
+        return self._offered_qos_profiles
+
+    @offered_qos_profiles.setter
+    def offered_qos_profiles(self, value: str) -> None:
+        if not value:
+            return
+
+        with Path(value).open('r') as file:
+            self._offered_qos_profiles = yaml.safe_load(file)
+
+    @property
     def save_cuboids_df(self) -> bool:
         """Save cuboids `DataFrame` status.
 
@@ -274,6 +298,16 @@ class PandaSet2BagConverter:  # noqa: D101
     def save_cuboids_df(self, value: bool) -> None:
         self._save_cuboids_df = value
 
+    def _get_offered_qos_profile_str_for(self, topic: str) -> str:
+        offered_qos_profile = self.offered_qos_profiles.get(topic)
+        if offered_qos_profile is None:
+            return ''
+
+        return yaml.dump(
+            [offered_qos_profile],
+            sort_keys=False,
+        )
+
     def _convert_camera_image_to_topic(self, camera_id: str) -> None:
         """Convert the images of a specified camera to a ROS topic.
 
@@ -289,7 +323,12 @@ class PandaSet2BagConverter:  # noqa: D101
         None
         """
         topic = f'{self.EGO_NAMESPACE}/{camera_id}/image'
-        conn = self._rosbag_writer.add_connection(topic, Image.__msgtype__)
+        offered_qos_profile = self._get_offered_qos_profile_str_for(topic)
+        conn = self._rosbag_writer.add_connection(
+            topic,
+            Image.__msgtype__,
+            offered_qos_profiles=offered_qos_profile,
+        )
 
         camera = self._sequence.camera[camera_id]
 
@@ -333,7 +372,12 @@ class PandaSet2BagConverter:  # noqa: D101
         None
         """
         topic = f'{self.EGO_NAMESPACE}/{camera_id}/image/compressed'
-        conn = self._rosbag_writer.add_connection(topic, CompressedImage.__msgtype__)
+        offered_qos_profile = self._get_offered_qos_profile_str_for(topic)
+        conn = self._rosbag_writer.add_connection(
+            topic,
+            CompressedImage.__msgtype__,
+            offered_qos_profiles=offered_qos_profile,
+        )
 
         camera = self._sequence.camera[camera_id]
 
@@ -383,7 +427,12 @@ class PandaSet2BagConverter:  # noqa: D101
         None
         """
         topic = f'{self.EGO_NAMESPACE}/{camera_id}/camera_info'
-        conn = self._rosbag_writer.add_connection(topic, CameraInfo.__msgtype__)
+        offered_qos_profile = self._get_offered_qos_profile_str_for(topic)
+        conn = self._rosbag_writer.add_connection(
+            topic,
+            CameraInfo.__msgtype__,
+            offered_qos_profiles=offered_qos_profile,
+        )
 
         camera = self._sequence.camera[camera_id]
 
@@ -459,7 +508,12 @@ class PandaSet2BagConverter:  # noqa: D101
         None
         """
         topic = f'{self.EGO_NAMESPACE}/gnss'
-        conn = self._rosbag_writer.add_connection(topic, NavSatFix.__msgtype__)
+        offered_qos_profile = self._get_offered_qos_profile_str_for(topic)
+        conn = self._rosbag_writer.add_connection(
+            topic,
+            NavSatFix.__msgtype__,
+            offered_qos_profiles=offered_qos_profile,
+        )
 
         for gps, timestamp in track(
             zip(self._sequence.gps, self._sequence.timestamps),
@@ -502,7 +556,12 @@ class PandaSet2BagConverter:  # noqa: D101
         lidar_name = format_lidar_name_from_id(lidar_id)
 
         topic = f'{self.EGO_NAMESPACE}/{lidar_name}'
-        conn = self._rosbag_writer.add_connection(topic, PointCloud2.__msgtype__)
+        offered_qos_profile = self._get_offered_qos_profile_str_for(topic)
+        conn = self._rosbag_writer.add_connection(
+            topic,
+            PointCloud2.__msgtype__,
+            offered_qos_profiles=offered_qos_profile,
+        )
 
         self._sequence.lidar.set_sensor(lidar_id.value)
         lidar = self._sequence.lidar
@@ -561,7 +620,12 @@ class PandaSet2BagConverter:  # noqa: D101
 
     def _convert_cuboids_to_topic(self) -> None:
         topic = '/panda/markers'
-        conn = self._rosbag_writer.add_connection(topic, MarkerArray.__msgtype__)
+        offered_qos_profile = self._get_offered_qos_profile_str_for(topic)
+        conn = self._rosbag_writer.add_connection(
+            topic,
+            MarkerArray.__msgtype__,
+            offered_qos_profiles=offered_qos_profile,
+        )
 
         for idx, (lidar_pose, cuboid, timestamp) in track(
             enumerate(
@@ -776,9 +840,12 @@ class PandaSet2BagConverter:  # noqa: D101
             )
 
     def _convert_tf_sensors(self) -> None:
+        topic = '/tf'
+        offered_qos_profile = self._get_offered_qos_profile_str_for(topic)
         tf_connection: Connection = self._rosbag_writer.add_connection(
-            '/tf',
+            topic,
             TFMessage.__msgtype__,
+            offered_qos_profiles=offered_qos_profile,
         )
 
         self._generate_stamped_transform_ego_vehicle(tf_connection)
