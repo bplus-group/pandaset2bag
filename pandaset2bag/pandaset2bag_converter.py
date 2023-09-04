@@ -678,7 +678,7 @@ class PandaSet2BagConverter:  # noqa: D101
                     'colors': [],
                     'text': to_json_with_schema(
                         table_schema,
-                        cuboid.iloc[[row.Index]].to_json(orient='records'),
+                        df.iloc[[row.Index]].to_json(orient='records'),
                     ),
                     'mesh_resource': '',
                     'mesh_use_embedded_materials': False,
