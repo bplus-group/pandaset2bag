@@ -626,6 +626,7 @@ class PandaSet2BagConverter:  # noqa: D101
             MarkerArray.__msgtype__,
             offered_qos_profiles=offered_qos_profile,
         )
+        table_schema = None
 
         for idx, (lidar_pose, cuboid, timestamp) in track(
             enumerate(
@@ -640,8 +641,7 @@ class PandaSet2BagConverter:  # noqa: D101
         ):
             df = cuboid_data_frame_to_normative_ego(cuboid, lidar_pose)
 
-            table_schema = None
-            if not table_schema:
+            if table_schema is None:
                 table_schema = build_table_schema(df)
 
             if self._save_cuboids_df:
