@@ -1,98 +1,119 @@
-[tool.black]
-line-length = 88
-target-version = ['py38', 'py39', 'py310']
-skip-string-normalization = true
-
 [tool.mypy]
 python_version = '3.8'
-strict = true
-implicit_optional = false
+
+# Ensure full coverage
+disallow_untyped_calls = true
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+disallow_untyped_decorators = true
+check_untyped_defs = true
+
+# Restrict dynamic typing
+disallow_any_generics = true
+disallow_subclassing_any = true
+warn_return_any = true
+
+# Know exactly what you're doing
+warn_redundant_casts = true
+warn_unused_ignores = true
+warn_unused_configs = true
+warn_unreachable = true
 show_error_codes = true
 show_column_numbers = true
 
-[[tool.mypy.overrides]]
-module = [
-  'numpy.*',
-  'pandas.*',
-  'pandaset.*',
-  'rich.*',
-  'setuptools.*',
-  'scipy.*',
-]
+# Explicit is better than implicit
+no_implicit_optional = true
+
+# Ignore all untyped third-party packages.
 ignore_missing_imports = true
+follow_imports = 'silent'
 
 [tool.ruff]
-line-length = 88
+line-length = 120
+indent-width = 4
+
 target-version = 'py38'
-extend-select = [
-  # flake8-bugbear
-  'B',
-  # flake8-blind-except
-  'BLE',
-  # flake8-comprehensions
-  'C4',
-  # flake8-commas
-  'COM',
-  # pydocsytle
-  'D',
-  # eradicate
-  'ERA',
-  # isort
-  'I',
-  # flake8-import-conventions
-  'ICN',
-  # flake8-no-pep420
-  'INP',
-  # flake8-implicit-str-concat
-  'ISC',
-  # pep8-naming
-  'N',
-  # NumPy-specific rules
-  'NPY',
-  # pandas-vet
-  'PD',
-  # pygrep-hooks
-  'PGH',
-  # flake8-pie
-  'PIE',
-  # flake8-use-pathlib
-  'PTH',
-  # flake8-quotes
-  'Q',
-  # flake8-return
-  'RET',
-  # flake8-raise
-  'RSE',
-  # Ruff-specific rules
-  'RUF',
-  # flake8-bandit
-  'S',
-  # flake8-self
-  'SLF',
-  # flake8-simplify
-  'SIM',
-  # flake8-print
-  'T20',
-  # flake8-type-checking
-  'TCH',
-  # flake8-tidy-imports
-  'TID',
-  # flake8-2020
-  'YTT',
-]
+
+[tool.ruff.lint]
+select = ['ALL']
 ignore = [
-  'D100',  # pydocstyle: Missing docstring in public module
-  'D203',  # pydocstyle: 1 blank line required before class docstring
-  'D213',  # pydocstyle: Multi-line docstring summary should start at the second line
-  'PD901', # pandas-vet: df is a bad variable name. Be kinder to your future self.
+  'ANN',     # flake8-annotations
+  'D',       # pydocstyle
+  'INP001',  # flake8-no-pep420: implicit-namespace-package
+  'PD901',   # pandas-df-variable-name:	Avoid using the generic variable name df for DataFrames
+  'PLR0913', # Pylint: too-may-arguments
+  'TRY',     # tryceratops
 ]
 
-[tool.ruff.flake8-quotes]
+# Allow fix for all enabled rules (when `--fix`) is provided.
+fixable = ['ALL']
+unfixable = []
+
+# If lint.pycodestyle.ignore-overlong-task-comments is true,
+# this rule will also ignore comments that start with any of the specified lint.task-tags
+task-tags = ['+ ', '! ', '? ', '* ']
+
+# Allow unused variables when underscore-prefixed.
+dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
+
+[tool.ruff.lint.per-file-ignores]
+'__init__.py' = ['D104']
+'__main__.py' = ['D103', 'D104']
+'geometry.py' = ['N803', 'N806']
+
+[tool.ruff.lint.flake8-quotes]
 docstring-quotes = 'double'
 inline-quotes = 'single'
 multiline-quotes = 'double'
 
-[tool.ruff.per-file-ignores]
-'__init__.py' = ['D104']
-'__main__.py' = ['D103', 'D104']
-'geometry.py' = ['N803', 'N806']
+[tool.ruff.lint.isort]
+force-single-line = true
+
+[tool.ruff.lint.pycodestyle]
+ignore-overlong-task-comments = true
+
+[tool.ruff.lint.pydocstyle]
+convention = "numpy"
+
+[tool.ruff.format]
+# Unlike Black, use double quotes for strings.
+quote-style = 'single'
+
+# Like Black, indent with spaces, rather than tabs.
+indent-style = 'space'
+
+# Like Black, respect magic trailing commas.
+skip-magic-trailing-comma = false
+
+# Like Black, automatically detect the appropriate line ending.
+line-ending = 'auto'
+
+# Enable auto-formatting of code examples in docstrings. Markdown,
+# reStructuredText code/literal blocks and doctests are all supported.
+docstring-code-format = true
+
+# Set the line length limit used when formatting code snippets in
+# docstrings.
+docstring-code-line-length = 'dynamic'
+
+[tool.numpydoc_validation]
+checks = [
+  "all",  # report on all checks
+  "ES01", # but don't require an extended summary
+  "EX01", # or examples
+  "SA01", # or a see also section
+  "SS06", # and don't require the summary to fit on one line
+]
+exclude = [ # don't report on checks for these
+  '\.undocumented_method$',
+  '\.__init__$',
+  '\.__repr__$',
+  '\.__str__$',
+  '(?<=\.)_\w+',            # exclude internals
+  '__main__',               # exclude __main__.py
+]
+override_SS05 = [ # allow docstrings to start with these words
+  '^Process ',
+  '^Assess ',
+  '^Access ',
+]

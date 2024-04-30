@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-
 # MIT License
 #
 # Copyright (c) 2023 b-plus technologies GmbH
@@ -22,11 +20,13 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+# numpydoc ignore=GL08
 from enum import Enum
 
 
 class CompressedImageFormat(str, Enum):
-    """An enumeration class for image compression formats.
+    """
+    An enumeration class for image compression formats.
 
     This class defines an enumeration of image compression formats, which can
     be used to specify the format in which an image should be compressed.
@@ -47,7 +47,8 @@ class CompressedImageFormat(str, Enum):
 
 
 class ImageConvertType(int, Enum):
-    """An enumeration class for image conversion type.
+    """
+    An enumeration class for image conversion type.
 
     This class defines an enumeration of image conversion types, which can
     be used to specify how an image should be converted. The three options are:
@@ -73,7 +74,8 @@ class ImageConvertType(int, Enum):
 
 
 class LidarIdentifier(int, Enum):
-    """An enumeration class for LiDAR sensor models.
+    """
+    An enumeration class for LiDAR sensor models.
 
     This class defines an enumeration of LIDAR sensor models, which can be
     used to specify the type of LiDAR sensor being used. The two options are:

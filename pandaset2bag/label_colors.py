@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-
 # MIT License
 #
 # Copyright (c) 2023 b-plus technologies GmbH
@@ -22,9 +20,10 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-from typing import Dict, Tuple
+# numpydoc ignore=GL08
+from __future__ import annotations
 
-LABEL_COLORMAP: Dict[str, Tuple[float, float, float]] = {
+LABEL_COLORMAP: dict[str, tuple[float, float, float]] = {
     'Smoke': (0.8187488187488188, 1.0, 0.0),
     'Exhaust': (0.7492634551458082, 1.0, 0.0),
     'Spray or rain': (0.6797780915427977, 1.0, 0.0),

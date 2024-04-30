@@ -1,3 +1,4 @@
+# numpydoc ignore=GL08
 from pathlib import Path
 
 from setuptools import setup
@@ -18,10 +19,7 @@ with Path('requirements.txt').open('r') as f:
 setup(
     name=PACKAGE_NAME,
     version=__version__,
-    description=(
-        'Command-line utility (and Python library) for converting '
-        'the PandaSet Dataset to ROS2 bag files'
-    ),
+    description=('Command-line utility (and Python library) for converting the PandaSet Dataset to ROS2 bag files'),
     keywords='pandaset, ros, ros2, rosbag, dataset, pypi, package',
     long_description=long_description,
     long_description_content_type='text/markdown',

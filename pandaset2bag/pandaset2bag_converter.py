@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-
 # MIT License
 #
 # Copyright (c) 2023 b-plus technologies GmbH
@@ -22,6 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+# numpydoc ignore=GL08
 from __future__ import annotations
 
 import os
@@ -50,7 +49,7 @@ if os.getenv('UPDATED_VISUALIZATION_MSG_MARKER', 'false').lower() == 'true':
 
     register_updated_visualization_msgs__msg__Marker()
 
-    from rosbags.typesys.types import (  # type: ignore[attr-defined]  # noqa: I001, RUF100, E501
+    from rosbags.typesys.types import (  # noqa: I001, RUF100, E501
         visualization_msgs__msg__MeshFile as MeshFile,
     )
 
@@ -65,9 +64,7 @@ from rosbags.typesys.types import geometry_msgs__msg__Point as Point
 from rosbags.typesys.types import geometry_msgs__msg__Pose as Pose
 from rosbags.typesys.types import geometry_msgs__msg__Quaternion as Quaternion
 from rosbags.typesys.types import geometry_msgs__msg__Transform as Transform
-from rosbags.typesys.types import (
-    geometry_msgs__msg__TransformStamped as TransformStamped,
-)
+from rosbags.typesys.types import geometry_msgs__msg__TransformStamped as TransformStamped
 from rosbags.typesys.types import geometry_msgs__msg__Vector3 as Vector3
 from rosbags.typesys.types import sensor_msgs__msg__CameraInfo as CameraInfo
 from rosbags.typesys.types import sensor_msgs__msg__CompressedImage as CompressedImage
@@ -78,47 +75,44 @@ from rosbags.typesys.types import sensor_msgs__msg__PointCloud2 as PointCloud2
 from rosbags.typesys.types import sensor_msgs__msg__RegionOfInterest as RegionOfInterest
 from rosbags.typesys.types import std_msgs__msg__ColorRGBA as ColorRGBA
 from rosbags.typesys.types import std_msgs__msg__Header as Header
-from rosbags.typesys.types import (
-    tf2_msgs__msg__TFMessage as TFMessage,
-)
+from rosbags.typesys.types import tf2_msgs__msg__TFMessage as TFMessage
 from rosbags.typesys.types import visualization_msgs__msg__Marker as Marker
 from rosbags.typesys.types import visualization_msgs__msg__MarkerArray as MarkerArray
 from scipy.spatial.transform import Rotation as R  # noqa: N817
 
-from .enums import CompressedImageFormat, ImageConvertType, LidarIdentifier
-from .geometry import (
-    cuboid_data_frame_to_normative_ego,
-    ego_vehicle_to_normative_ego,
-    get_flatten_calibration_matrices,
-    lidar_data_frame_to_ego,
-    lidar_frame_to_normative,
-    mat_encoded_as_pose,
-    pose_to_normative,
-    transform_origin_to_target,
-)
+from .enums import CompressedImageFormat
+from .enums import ImageConvertType
+from .enums import LidarIdentifier
+from .geometry import cuboid_data_frame_to_normative_ego
+from .geometry import ego_vehicle_to_normative_ego
+from .geometry import get_flatten_calibration_matrices
+from .geometry import lidar_data_frame_to_ego
+from .geometry import lidar_frame_to_normative
+from .geometry import mat_encoded_as_pose
+from .geometry import pose_to_normative
+from .geometry import transform_origin_to_target
 from .label_colors import LABEL_COLORMAP
-from .utils import (
-    format_lidar_name_from_id,
-    get_default_lidar_point_fields,
-    get_frame_id_from_topic,
-    save_cuboid_data_frame,
-    split_unix_timestamp,
-    to_json_with_schema,
-)
+from .utils import format_lidar_name_from_id
+from .utils import get_default_lidar_point_fields
+from .utils import get_frame_id_from_topic
+from .utils import save_cuboid_data_frame
+from .utils import split_unix_timestamp
+from .utils import to_json_with_schema
 
 
-class PandaSet2BagConverter:  # noqa: D101
+class PandaSet2BagConverter:
+    """
+    Class to convert a PandaSet sequence to a rosbag file.
+
+    Parameters
+    ----------
+    dataset_dir : Path, str
+        The directory path of the dataset.
+    """
+
     EGO_NAMESPACE = '/panda/ego_vehicle'
 
     def __init__(self, dataset_dir: Path | str):
-        """Initialize a PandaSet2BagConverter instance.
-
-        Args:
-        ----
-        dataset_dir (Path, str):
-            The directory path of the dataset.
-
-        """
         super().__init__()
 
         self._dataset: DataSet = DataSet(dataset_dir)
@@ -137,7 +131,8 @@ class PandaSet2BagConverter:  # noqa: D101
 
     @property
     def max_image_size(self) -> tuple[int, int] | None:
-        """Maximum image size to convert to.
+        """
+        Maximum image size to convert to.
 
         Returns
         -------
@@ -148,13 +143,14 @@ class PandaSet2BagConverter:  # noqa: D101
         return self._max_imgsz
 
     @max_image_size.setter
-    def max_image_size(self, value: tuple[int, int] | None) -> None:
+    def max_image_size(self, value: tuple[int, int] | None) -> None:  # numpydoc ignore=GL08
         if value:
             self._max_imgsz = value
 
     @property
     def image_convert_type(self) -> ImageConvertType:
-        """Type to be used to convert an image.
+        """
+        Type to be used to convert an image.
 
         Returns
         -------
@@ -165,12 +161,13 @@ class PandaSet2BagConverter:  # noqa: D101
         return self._image_convert_type
 
     @image_convert_type.setter
-    def image_convert_type(self, value: ImageConvertType) -> None:
+    def image_convert_type(self, value: ImageConvertType) -> None:  # numpydoc ignore=GL08
         self._image_convert_type = value
 
     @property
     def image_format(self) -> CompressedImageFormat:
-        """Image format used for compression.
+        """
+        Image format used for compression.
 
         Returns
         -------
@@ -180,12 +177,13 @@ class PandaSet2BagConverter:  # noqa: D101
         return self._image_format
 
     @image_format.setter
-    def image_format(self, value: CompressedImageFormat) -> None:
+    def image_format(self, value: CompressedImageFormat) -> None:  # numpydoc ignore=GL08
         self._image_format = value
 
     @property
     def jpeg_quality(self) -> int:
-        """Image compression quality for JPEG format.
+        """
+        Image compression quality for JPEG format.
 
         The image quality, on a scale from 0 (worst) to 95 (best), or
         the string keep. Values above 95 should be avoided; 100 disables
@@ -196,17 +194,19 @@ class PandaSet2BagConverter:  # noqa: D101
 
         Returns
         -------
-        int: JPEG quality [0, 100]. Default is 75.
+        int
+            JPEG quality [0, 100]. Default is 75.
         """
         return self._jpeg_quality
 
     @jpeg_quality.setter
-    def jpeg_quality(self, value: int) -> None:
+    def jpeg_quality(self, value: int) -> None:  # numpydoc ignore=GL08
         self._jpeg_quality = max(min(value, 0), 100)
 
     @property
     def png_compress_level(self) -> int:
-        """Image compression level for PNG format.
+        """
+        Image compression level for PNG format.
 
         ZLIB compression level, a number between 0 and 9: 1 gives best
         speed, 9 gives best compression, 0 gives no compression at all.
@@ -216,17 +216,19 @@ class PandaSet2BagConverter:  # noqa: D101
 
         Returns
         -------
-        int: PNG compress level [0, 9]. Default is 7.
+        int
+            PNG compress level [0, 9]. Default is 7.
         """
         return self._png_compress_level
 
     @png_compress_level.setter
-    def png_compress_level(self, value: int) -> None:
+    def png_compress_level(self, value: int) -> None:  # numpydoc ignore=GL08
         self._png_compress_level = max(min(value, 0), 9)
 
     @property
     def png_optimize(self) -> bool:
-        """Image optimization status for PNG format.
+        """
+        Image optimization status for PNG format.
 
         If True, instructs the PNG writer to make the
         output file as small as possible. This includes extra
@@ -236,44 +238,47 @@ class PandaSet2BagConverter:  # noqa: D101
 
         Returns
         -------
-        bool: Image optimization status. Default is False.
+        bool
+            Image optimization status. Default is False.
         """
         return self._png_optimize
 
     @png_optimize.setter
-    def png_optimize(self, value: bool) -> None:
+    def png_optimize(self, value: bool) -> None:  # numpydoc ignore=GL08
         self._png_optimize = value
 
     @property
     def compression_mode(self) -> Writer.CompressionMode:
-        """Compression mode for rosbag file.
+        """
+        Compression mode for rosbag file.
 
         Returns
         -------
-        Writer.CompressionMode:
+        Writer.CompressionMode
             The compression mode to be applied to the rosbag file.
             Default is NONE, i.e no compression.
         """
         return self._compression_mode
 
     @compression_mode.setter
-    def compression_mode(self, value: Writer.CompressionMode) -> None:
+    def compression_mode(self, value: Writer.CompressionMode) -> None:  # numpydoc ignore=GL08
         self._compression_mode = value
 
     @property
     def offered_qos_profiles(self) -> dict[str, Any]:
-        """QoS profile to be offered for published topics.
+        """
+        QoS profile to be offered for published topics.
 
         Returns
         -------
-        dict[str, Any]:
+        dict[str, Any]
             QoS profiles represented as a dict.
             Default is '', i.e no QoS profiles offered.
         """
         return self._offered_qos_profiles
 
     @offered_qos_profiles.setter
-    def offered_qos_profiles(self, value: str) -> None:
+    def offered_qos_profiles(self, value: str) -> None:  # numpydoc ignore=GL08
         if not value:
             return
 
@@ -282,7 +287,8 @@ class PandaSet2BagConverter:  # noqa: D101
 
     @property
     def save_cuboids_df(self) -> bool:
-        """Save cuboids `DataFrame` status.
+        """
+        Save cuboids `DataFrame` status.
 
         If True, save the converted cuboids `DataFrame`'s as `.pkl.gz` files,
         representing the properties of the cuboids in normalized ego
@@ -290,12 +296,13 @@ class PandaSet2BagConverter:  # noqa: D101
 
         Returns
         -------
-        bool: Cuboids `DataFrame` save status. Default is False.
+        bool
+            Cuboids `DataFrame` save status. Default is False.
         """
         return self._save_cuboids_df
 
     @save_cuboids_df.setter
-    def save_cuboids_df(self, value: bool) -> None:
+    def save_cuboids_df(self, value: bool) -> None:  # numpydoc ignore=GL08
         self._save_cuboids_df = value
 
     def _get_offered_qos_profile_str_for(self, topic: str) -> str:
@@ -309,16 +316,17 @@ class PandaSet2BagConverter:  # noqa: D101
         )
 
     def _convert_camera_image_to_topic(self, camera_id: str) -> None:
-        """Convert the images of a specified camera to a ROS topic.
+        """
+        Convert the images of a specified camera to a ROS topic.
 
         Applies downsizing to the images if a maximum image size is provided.
 
-        Args:
-        ----
-        camera_id (str):
+        Parameters
+        ----------
+        camera_id : str
             The ID of the camera for which the images are to be converted.
 
-        Returns:
+        Returns
         -------
         None
         """
@@ -358,16 +366,17 @@ class PandaSet2BagConverter:  # noqa: D101
             )
 
     def _convert_camera_image_to_compressed_topic(self, camera_id: str) -> None:
-        """Convert the images of a specified camera to a ROS topic.
+        """
+        Convert the images of a specified camera to a ROS topic.
 
         Applies downsizing to the images if a maximum image size is provided.
 
-        Args:
-        ----
-        camera_id (str):
+        Parameters
+        ----------
+        camera_id : str
             The ID of the camera for which the images are to be converted.
 
-        Returns:
+        Returns
         -------
         None
         """
@@ -415,14 +424,15 @@ class PandaSet2BagConverter:  # noqa: D101
             )
 
     def _convert_camera_info_to_topic(self, camera_id: str) -> None:
-        """Convert the camera meta data of a specified camera to a ROS topic.
+        """
+        Convert the camera meta data of a specified camera to a ROS topic.
 
-        Args:
-        ----
-        camera_id (str):
+        Parameters
+        ----------
+        camera_id : str
             The ID of the camera for which the images are to be converted.
 
-        Returns:
+        Returns
         -------
         None
         """
@@ -447,9 +457,7 @@ class PandaSet2BagConverter:  # noqa: D101
             message = CameraInfo(
                 Header(
                     stamp=Time(sec=sec, nanosec=nsec),
-                    frame_id=get_frame_id_from_topic(conn.topic, suffix='/camera_info')[
-                        1:
-                    ],
+                    frame_id=get_frame_id_from_topic(conn.topic, suffix='/camera_info')[1:],
                 ),
                 height=img.height,
                 width=img.width,
@@ -476,7 +484,8 @@ class PandaSet2BagConverter:  # noqa: D101
             )
 
     def _convert_cameras(self) -> None:
-        """Convert the camera images and camera info for the sequence.
+        """
+        Convert the camera images and camera info for the sequence.
 
         Returns
         -------
@@ -501,7 +510,8 @@ class PandaSet2BagConverter:  # noqa: D101
             self._convert_camera_info_to_topic(camera_id)
 
     def _convert_gps_to_topic(self) -> None:
-        """Convert the GPS data for the sequence to a ROS topic.
+        """
+        Convert the GPS data for the sequence to a ROS topic.
 
         Returns
         -------
@@ -542,14 +552,15 @@ class PandaSet2BagConverter:  # noqa: D101
             )
 
     def _convert_lidar_to_topic(self, lidar_id: LidarIdentifier) -> None:
-        """Convert LiDAR data to a ROS topic for a given sensor_id.
+        """
+        Convert LiDAR data to a ROS topic for a given sensor_id.
 
-        Args:
-        ----
-        lidar_id (LidarIdentifier):
+        Parameters
+        ----------
+        lidar_id : LidarIdentifier
             LiDAR sensor to be converted to topic.
 
-        Returns:
+        Returns
         -------
         None
         """
@@ -609,7 +620,8 @@ class PandaSet2BagConverter:  # noqa: D101
             )
 
     def _convert_lidars(self) -> None:
-        """Convert LiDAR's for the sequence.
+        """
+        Convert LiDAR's for the sequence.
 
         Returns
         -------
@@ -684,10 +696,7 @@ class PandaSet2BagConverter:  # noqa: D101
                     'mesh_use_embedded_materials': False,
                 }
 
-                if (
-                    os.getenv('UPDATED_VISUALIZATION_MSG_MARKER', 'false').lower()
-                    == 'true'
-                ):
+                if os.getenv('UPDATED_VISUALIZATION_MSG_MARKER', 'false').lower() == 'true':
                     marker_dict.update(
                         {
                             'texture_resource': '',
@@ -704,7 +713,7 @@ class PandaSet2BagConverter:  # noqa: D101
                         },
                     )
 
-                markers.append(Marker(**marker_dict))  # type: ignore[arg-type]
+                markers.append(Marker(**marker_dict))
 
             message = MarkerArray(markers=markers)
             self._rosbag_writer.write(
@@ -857,20 +866,22 @@ class PandaSet2BagConverter:  # noqa: D101
             self._generate_stamped_transform_lidar(lidar_id, tf_connection)
 
     def convert(self, sequence_id: str, path: Path | str = '') -> None:
-        """Convert a sequence from the PandaSet to a rosbag file.
+        """
+        Convert a sequence from the PandaSet to a rosbag file.
 
-        Args:
-        ----
-        sequence_id (str):
+        Parameters
+        ----------
+        sequence_id : str
             The ID of the sequence to be converted.
-        path (Union[Path, str], optional):
+        path : Union[Path, str], optional
             The save path of the rosbag file. Default is '', i.e the
             rosbag file will be saved in the current working directory
             with the name 'pandaset_{sequence_id}'.
 
-        Returns:
+        Returns
         -------
         None
+            Nothing returned by this function.
         """
         self._rosbag_writer = Writer(path or f'pandasetbag_{sequence_id}')
         self._rosbag_writer.set_compression(

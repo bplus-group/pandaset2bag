@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-
 # MIT License
 #
 # Copyright (c) 2023 b-plus technologies GmbH
@@ -22,10 +20,12 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+# numpydoc ignore=GL08
 from __future__ import annotations
 
 import typing
-from typing import Dict, NewType
+from typing import Dict
+from typing import NewType
 
 if typing.TYPE_CHECKING:
     import numpy.typing as npt
@@ -37,7 +37,8 @@ from pandaset.geometry import lidar_points_to_ego
 from scipy.spatial.transform import Rotation as R  # noqa: N817
 
 Pose = NewType('Pose', Dict[str, Dict[str, float]])
-"""Pose dictionary. The dictionary keys return the following types:
+"""
+Pose dictionary. The dictionary keys return the following types:
 
 - `position`: `dict`
     - `x`: `float`
@@ -58,7 +59,8 @@ Pose = NewType('Pose', Dict[str, Dict[str, float]])
 """
 
 T2Norm: npt.NDArray[np.float64] = np.identity(4)
-"""Homogenous transformation matrix from PandaSet to normative coordinates.
+"""
+Homogenous transformation matrix from PandaSet to normative coordinates.
 
     PandaSet ego coordinates of e.g. a LiDAR are:
     - x pointing to the right
@@ -94,23 +96,24 @@ def get_flatten_calibration_matrices(
     npt.NDArray[np.float64],
     npt.NDArray[np.float64],
 ]:
-    """Get the flatten calibration matrices for an given intrinsics.
+    """
+    Get the flatten calibration matrices for an given intrinsics.
 
     Calibration matrices will correspond to the normative coordinate system.
 
-    Args:
-    ----
-    intrinsics (Intrinsics):
+    Parameters
+    ----------
+    intrinsics : Intrinsics
         Intrinsic parameters of a camera (fx, fy, cx, cy).
-    imgsz (Tuple[int], optional):
+    imgsz : Tuple[int], optional
         An optional tuple of integers representing the scaled size of the
         image. If provided, the intrinsic matrix 'K' is scaled to fit the
         image size. Default is None, i.e no scaling applied to original
         image captured by the camera.
 
-    Returns:
+    Returns
     -------
-    Tuple[ndarray[np.float64], ...]:
+    Tuple[ndarray[np.float64], ...]
         A tuple of flattened numpy arrays representing
         the distortion, intrinsic, rotation, and projection matrices
         respectively.
@@ -148,11 +151,12 @@ def lidar_data_frame_to_ego(
     lidar_df: DataFrame,
     lidar_pose: Pose,
 ) -> npt.NDArray[np.float32]:
-    """Convert LiDAR points to ego coordinates.
+    """
+    Convert LiDAR points to ego coordinates.
 
-    Args:
-    ----
-    lidar_df (DataFrame):
+    Parameters
+    ----------
+    lidar_df : DataFrame
         A concatenated DataFrame representing a set of Lidar points in the
         world coordinate frame. The DataFrame should contain at least 5
         columns, with the first 3 columns representing the x, y, and z
@@ -160,33 +164,33 @@ def lidar_data_frame_to_ego(
         intensity of the point and the fifth column represents the
         class ID associated with pandas contains each point.
 
-    - index: `int`
+     - index: `int`
         - Ordered point cloud. When joining the raw point cloud with data
             from ``SemanticSegmentation``, it is important to keep the index
             order.
-    - `x`: `float`
+     - `x`: `float`
         - Position of point in world-coordinate system (x-axis) in meter
-    - `y`: `float`
+     - `y`: `float`
         - Position of point in world-coordinate system (y-axis) in meter
-    - `z`: `float`
+     - `z`: `float`
         - Position of point in world-coordinate system (z-axis) in meter
-    - `i`: `float`
+     - `i`: `float`
         - Reflection intensity in a range `[0, 255]`
-    - `t`: `float`
+     - `t`: `float`
         - Recorded timestamp for specific point
-    - `d`: `int`
+     - `d`: `int`
         - Sensor ID. `0` -> mechnical 360° LiDAR, `1` -> forward-facing
             LiDAR
-    - `class`: `int`
+     - `class`: `int`
         - integer code representing the type of object the point
             belongs to (e.g. Bus, Car, Ground)
 
-    lidar_pose (Pose):
+    lidar_pose : Pose
         The pose of the Lidar sensor in the world coordinate frame.
 
-    Returns:
+    Returns
     -------
-    npt.NDArray[np.float32]:
+    npt.NDArray[np.float32]
         A 2D array of shape `(n, 5)`, where `n` is the number of Lidar
         points in the input `frame`. The first 3 columns of the array
         represent the x, y, and z coordinates of each point, transformed
@@ -211,7 +215,8 @@ def lidar_data_frame_to_ego(
 
 
 def lidar_frame_to_normative(frame: npt.NDArray[np.float32]) -> npt.NDArray[np.float32]:
-    """Convert LiDAR frame to normative.
+    """
+    Convert LiDAR frame to normative.
 
     Given a LiDAR frame represented as a numpy ndarray of shape (N, 6) with
     dtype np.float32, where N is the number of points and 5 is (x, y, z,
@@ -228,14 +233,14 @@ def lidar_frame_to_normative(frame: npt.NDArray[np.float32]) -> npt.NDArray[np.f
     - y pointings to the left
     - z pointing up
 
-    Args:
-    ----
-    frame (npt.NDArray[np.float32]):
+    Parameters
+    ----------
+    frame : npt.NDArray[np.float32]
         LiDAR frame in the coordinate system of the PandaSet.
 
-    Returns:
+    Returns
     -------
-    npt.NDArray[np.float32]:
+    npt.NDArray[np.float32]
         LiDAR frame in the normative coordinate system.
     """
     norm_frame = frame.copy()
@@ -247,20 +252,21 @@ def lidar_frame_to_normative(frame: npt.NDArray[np.float32]) -> npt.NDArray[np.f
 
 
 def ego_vehicle_to_normative_ego(pose: Pose) -> Pose:
-    """Convert ego vehicle (is equivalent to LiDAR) pose to normative coordinates.
+    """
+    Convert ego vehicle (is equivalent to LiDAR) pose to normative coordinates.
 
     Given a LiDAR Pose object, this function returns a modified Pose object,
     position transformed to match normative coordinates. Contrary to
     `pose_to_normative` the rotation/heading of the pose will be ignored.
 
-    Args:
-    ----
-    pose (Pose):
+    Parameters
+    ----------
+    pose : Pose
         Pose in the coordinate system of the PandaSet.
 
-    Returns:
+    Returns
     -------
-    Pose:
+    Pose
         Pose in the normative coordinate system.
     """
     M_p = pose_encoded_as_mat(pose)
@@ -270,19 +276,20 @@ def ego_vehicle_to_normative_ego(pose: Pose) -> Pose:
 
 
 def pose_to_normative(pose: Pose) -> Pose:
-    """Convert pose to normative coordinates.
+    """
+    Convert pose to normative coordinates.
 
     Given a Pose object, this function returns a Pose object,
     position / translation transformed to match normative coordinates.
 
-    Args:
-    ----
-    pose (Pose):
+    Parameters
+    ----------
+    pose : Pose
         Pose in the coordinate system of the PandaSet.
 
-    Returns:
+    Returns
     -------
-    Pose:
+    Pose
         Pose in the normative coordinate system.
     """
     M_p = pose_encoded_as_mat(pose)
@@ -294,19 +301,20 @@ def heading_position_to_mat(
     heading: list[float],
     position: list[float],
 ) -> npt.NDArray[np.float64]:
-    """Get the homogenous matrix from a given rotation and translation.
+    """
+    Get the homogenous matrix from a given rotation and translation.
 
-    Args:
-    ----
-    heading (List[float]):
+    Parameters
+    ----------
+    heading : List[float]
         A list of 4 floats representing the quaternion [w, x, y, z]
         of the rotation.
-    position (List[float]):
+    position : List[float]
         A list of 3 floats representing the [x, y, z] translation.
 
-    Returns:
+    Returns
     -------
-    npt.NDArray[np.float64]:
+    npt.NDArray[np.float64]
         A 4x4 numpy ndarray representing heading, position as matrix.
     """
     quat = np.array([*heading[1:], heading[0]])  # reorder to x, y, z, w
@@ -321,18 +329,19 @@ def heading_position_to_mat(
 
 
 def transform_origin_to_target(origin: Pose, target: Pose) -> npt.NDArray[np.float64]:
-    """Calculate the transformation matrix from origin to target.
+    """
+    Calculate the transformation matrix from origin to target.
 
-    Args:
-    ----
-    origin (Pose):
+    Parameters
+    ----------
+    origin : Pose
         A pose dictionary of the origin (sensor).
-    target (Pose):
+    target : Pose
         A pose dictionary of the target (sensor).
 
-    Returns:
+    Returns
     -------
-    npt.NDArray[np.float64]:
+    npt.NDArray[np.float64]
             A 4x4 numpy ndarray representing the homogenous
             transformation matrix from the origin to the target.
     """
@@ -342,20 +351,21 @@ def transform_origin_to_target(origin: Pose, target: Pose) -> npt.NDArray[np.flo
     T_camera2lidar: npt.NDArray[np.float64]
     T_camera2lidar = np.linalg.inv(T_lidar2world) @ T_camera2world
 
-    return T_camera2lidar  # noqa: RET504
+    return T_camera2lidar
 
 
 def pose_encoded_as_mat(pose: Pose) -> npt.NDArray[np.float64]:
-    """Get the homogenous matrix from a given Pose object.
+    """
+    Get the homogenous matrix from a given Pose object.
 
-    Args:
-    ----
-    pose (Pose):
+    Parameters
+    ----------
+    pose : Pose
         A pose dictionary.
 
-    Returns:
+    Returns
     -------
-    npt.NDArray[np.float64]:
+    npt.NDArray[np.float64]
         A 4x4 numpy ndarray representing the Pose object as matrix.
     """
     heading = list(pose['heading'].values())
@@ -365,16 +375,17 @@ def pose_encoded_as_mat(pose: Pose) -> npt.NDArray[np.float64]:
 
 
 def mat_encoded_as_pose(T: npt.NDArray[np.float64]) -> Pose:
-    """Encode a homogeneous matrix into a Pose data structure.
+    """
+    Encode a homogeneous matrix into a Pose data structure.
 
-    Args:
-    ----
-    T (npt.NDArray[np.float64]):
+    Parameters
+    ----------
+    T : npt.NDArray[np.float64]
         A 4x4 numpy ndarray representing the homogeneous matrix.
 
-    Returns:
+    Returns
     -------
-    Pose:
+    Pose
         The matrix encoded as a Pose object.
     """
     position = T[0:3, 3]
@@ -399,19 +410,20 @@ def cuboid_data_frame_to_normative_ego(
     cuboid_df: DataFrame,
     lidar_pose: Pose,
 ) -> DataFrame:
-    """Transform cuboid data from world to normalized ego coordinates.
+    """
+    Transform cuboid data from world to normalized ego coordinates.
 
-    Args:
-    ----
-    cuboid_df (DataFrame):
+    Parameters
+    ----------
+    cuboid_df : DataFrame
         A DataFrame with columns representing the properties of the
         cuboids in world-coordinates.
-    lidar_pose (Pose):
+    lidar_pose : Pose
         A pose dictionary of the LiDAR sensor in world-coordinates.
 
-    Returns:
+    Returns
     -------
-    DataFrame:
+    DataFrame
         A DataFrame with columns representing the properties of the
         cuboids in normalized ego coordinates.
     """
@@ -422,7 +434,7 @@ def cuboid_data_frame_to_normative_ego(
             np.roll(
                 R.from_euler('zyx', [row[3], 0, 0]).as_quat(),
                 1,
-            ).tolist(),  # IMPROVE: drop np.roll for performance improvements  # noqa: E501
+            ).tolist(),  # IMPROVE: drop np.roll for performance improvements
             row[6:9],
         )
         for row in cuboid_df.itertuples()
@@ -431,9 +443,7 @@ def cuboid_data_frame_to_normative_ego(
     # transform cuboid from world to ego frame
     M_cuboid_poses_ego = np.linalg.inv(lidar_pose_mat) @ M_cuboid_poses
 
-    cuboid_df.iloc[:, 2] = [
-        R.from_matrix(M_p[:3, :3]).as_euler('zyx')[0] for M_p in M_cuboid_poses_ego
-    ]  # yaw
+    cuboid_df.iloc[:, 2] = [R.from_matrix(M_p[:3, :3]).as_euler('zyx')[0] for M_p in M_cuboid_poses_ego]  # yaw
 
     cuboid_df.iloc[:, 5] = [M_p[1:2, 3] for M_p in M_cuboid_poses_ego]  # position_x
     cuboid_df.iloc[:, 6] = [-M_p[:1, 3] for M_p in M_cuboid_poses_ego]  # positon_y

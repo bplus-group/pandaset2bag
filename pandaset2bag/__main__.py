@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-
 # MIT License
 #
 # Copyright (c) 2023 b-plus technologies GmbH
@@ -22,15 +20,15 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+# numpydoc ignore=GL08
+from __future__ import annotations
+
 import sys
-from argparse import (
-    ArgumentDefaultsHelpFormatter,
-    ArgumentParser,
-    HelpFormatter,
-    Namespace,
-)
+from argparse import ArgumentDefaultsHelpFormatter
+from argparse import ArgumentParser
+from argparse import HelpFormatter
+from argparse import Namespace
 from importlib.resources import path as resources_path
-from typing import List, Optional, Tuple
 
 from rosbags.rosbag2 import Writer
 
@@ -170,16 +168,17 @@ def get_version() -> str:
 
 
 def main() -> int:
-    def valid_imgsz(imgsz: List[int]) -> Optional[Tuple[int, int]]:
+    def valid_imgsz(imgsz: list[int]) -> tuple[int, int] | None:
         if not imgsz:
             return None
 
-        return tuple(imgsz) * 2 if len(imgsz) < 2 else tuple(imgsz)[:2]  # type: ignore[return-value]  # noqa: E501
+        return tuple(imgsz) * 2 if len(imgsz) < 2 else tuple(imgsz)[:2]  # type: ignore[return-value]  # noqa: PLR2004
 
     try:
         args = parse_arguments()
 
-        from .enums import CompressedImageFormat, ImageConvertType
+        from .enums import CompressedImageFormat
+        from .enums import ImageConvertType
         from .pandaset2bag_converter import PandaSet2BagConverter
 
         converter = PandaSet2BagConverter(args.dataset_dir)

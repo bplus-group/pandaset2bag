@@ -1,35 +1,35 @@
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.4.0
+    rev: v4.6.0
     hooks:
       - id: check-added-large-files
       - id: check-json
-      - id: check-toml
       - id: check-yaml
+      - id: debug-statements
       - id: double-quote-string-fixer
       - id: end-of-file-fixer
+      - id: requirements-txt-fixer
       - id: trailing-whitespace
-
+  - repo: https://github.com/charliermarsh/ruff-pre-commit
+    rev: v0.4.2
+    hooks:
+      - id: ruff
+        args: [--fix]
   - repo: https://github.com/asottile/add-trailing-comma
     rev: v3.1.0
     hooks:
       - id: add-trailing-comma
-  - repo: https://github.com/psf/black
-    rev: 23.7.0
-    hooks:
-      - id: black
   - repo: https://github.com/asottile/pyupgrade
-    rev: v3.10.1
+    rev: v3.15.2
     hooks:
       - id: pyupgrade
         args: [--py38-plus]
   - repo: https://github.com/pre-commit/mirrors-mypy
-    rev: v1.5.1
+    rev: v1.10.0
     hooks:
       - id: mypy
-        args: [--config-file=./pyproject.toml]
-        additional_dependencies: [rosbags==0.9.15]
-  - repo: https://github.com/charliermarsh/ruff-pre-commit
-    rev: v0.0.286
+        additional_dependencies: [types-requests]
+  - repo: https://github.com/numpy/numpydoc
+    rev: v1.7.0
     hooks:
-      - id: ruff
+      - id: numpydoc-validation

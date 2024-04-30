@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-
 # MIT License
 #
 # Copyright (c) 2023 b-plus technologies GmbH
@@ -22,13 +20,15 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+# numpydoc ignore=GL08
 from __future__ import annotations
 
 import typing
 
 if typing.TYPE_CHECKING:
     from pandas import DataFrame
-    from pandas._typing import CompressionOptions, JSONSerializable
+    from pandas._typing import CompressionOptions
+    from pandas._typing import JSONSerializable
 
     from .enums import LidarIdentifier
 
@@ -43,13 +43,26 @@ def register_updated_visualization_msgs__msg__Marker() -> None:  # noqa: N802
     """Update rosbags types with new definition of Marker.msg."""
 
     def guess_msgtype(path: Path) -> str:
-        """Guess message type name from path."""
+        """
+        Guess message type name from path.
+
+        Parameters
+        ----------
+        path : Path
+            The path to the message definition file.
+
+        Returns
+        -------
+        str
+            The name of the message type.
+        """  # numpydoc ignore=SS05
         name = path.relative_to(path.parents[1]).with_suffix('')
         if 'msg' not in name.parts:
             name = name.parent / 'msg' / name.name
         return str(name)
 
-    from rosbags.typesys import get_types_from_msg, register_types
+    from rosbags.typesys import get_types_from_msg
+    from rosbags.typesys import register_types
     from rosbags.typesys.types import FIELDDEFS
 
     package = f'{__package__}.visualization_msgs'
@@ -66,30 +79,31 @@ def register_updated_visualization_msgs__msg__Marker() -> None:  # noqa: N802
 
 
 def get_frame_id_from_topic(topic: str, root: str = '/panda', suffix: str = '') -> str:
-    """Get the frame ID associated with a ROS topic.
+    """
+    Get the frame ID associated with a ROS topic.
 
     The frame ID is the last part of the topic string,
     after the root namespace.
 
-    Args:
-    ----
-    topic (str):
+    Parameters
+    ----------
+    topic : str
         The name of the ROS topic to extract the frame ID from.
-    root (str, optional):
+    root : str, optional
         The prefix string that appears before the frame ID in
         the topic name. Defaults to '/panda'.
-    suffix (str, optional):
+    suffix : str, optional
         The suffix string that appears after the frame ID in
         the topic name. Defaults to ''.
 
-    Returns:
+    Returns
     -------
     str:
         The frame ID string extracted from the topic name.
 
-    Raises:
+    Raises
     ------
-    ValueError:
+    ValueError
         If the `root` or `suffix` strings are not found in the topic name.
     """
     topic = topic[len(root) :] if root and topic.startswith(root) else topic
@@ -97,21 +111,22 @@ def get_frame_id_from_topic(topic: str, root: str = '/panda', suffix: str = '') 
 
 
 def format_lidar_name_from_id(lidar_id: LidarIdentifier) -> str:
-    """Format Lidar name from its identifier.
+    """
+    Format Lidar name from its identifier.
 
     Given a LidarIdentifier object, this function returns a string that
     represents the formatted name of the Lidar. The returned name is
     lowercased and has underscores removed, with the last two characters
     converted to uppercase.
 
-    Args:
-    ----
-    lidar_id (LidarIdentifier):
+    Parameters
+    ----------
+    lidar_id : LidarIdentifier
         The identifier of the Lidar.
 
-    Returns:
+    Returns
     -------
-    str:
+    str
         The formatted name of the Lidar.
     """
     lidar_name = lidar_id.name.lower().replace('_', '')
@@ -119,16 +134,17 @@ def format_lidar_name_from_id(lidar_id: LidarIdentifier) -> str:
 
 
 def split_unix_timestamp(timestamp: float) -> tuple[int, int]:
-    """Split UNIX timestamp into seconds and nanoseconds.
+    """
+    Split UNIX timestamp into seconds and nanoseconds.
 
-    Args:
-    ----
-    timestamp (float):
+    Parameters
+    ----------
+    timestamp : float
         A UNIX timestamp in float format.
 
-    Returns:
+    Returns
     -------
-    Tuple[int, int]:
+    Tuple[int, int]
         A tuple of integers representing the seconds
         and nanoseconds of the timestamp respectively.
     """
@@ -139,7 +155,8 @@ def split_unix_timestamp(timestamp: float) -> tuple[int, int]:
 
 
 def get_default_lidar_point_fields() -> tuple[list[PointField], int]:
-    """Get default fields for LIDAR point clouds.
+    """
+    Get default fields for LIDAR point clouds.
 
     Returns a list of default `PointField` objects representing the standard
     fields used in a LiDAR point cloud.
@@ -155,17 +172,16 @@ def get_default_lidar_point_fields() -> tuple[list[PointField], int]:
 
     Returns
     -------
-    Tuple[List[PointField], int]:
-    - A list of `PointField` objects representing the standard fields used
-        in a LiDAR point cloud.
-    - An integer representing the number of bytes between consecutive
-        points in the point cloud.
+    Tuple[List[PointField], int]
+        - A list of `PointField` objects representing the standard fields used
+            in a LiDAR point cloud.
+        - An integer representing the number of bytes between consecutive
+            points in the point cloud.
     """
     channels = ('x', 'y', 'z', 'intensity', 'class_id')
 
     fields = [
-        PointField(name=name, offset=(i * 4), datatype=PointField.FLOAT32, count=1)
-        for i, name in enumerate(channels)
+        PointField(name=name, offset=(i * 4), datatype=PointField.FLOAT32, count=1) for i, name in enumerate(channels)
     ]
 
     point_step = len(fields) * 4
@@ -177,20 +193,21 @@ def to_json_with_schema(
     schema: dict[str, JSONSerializable],
     df_json_record: str,
 ) -> str:
-    """Convert a JSON-encoded record to a JSON string including schema.
+    """
+    Convert a JSON-encoded record to a JSON string including schema.
 
-    Args:
-    ----
-    schema (Dict[str, JSONSerializable]):
+    Parameters
+    ----------
+    schema : Dict[str, JSONSerializable]
         A dictionary containing the JSON schema that describes the format
         of the JSON data.
-    df_json_record (str):
+    df_json_record : str
         A JSON-encoded `DataFrame` using `orient='record'` that conforms
         to the specified schema.
 
-    Returns:
+    Returns
     -------
-    str:
+    str
         A string representation of the JSON-encoded record, including
         the JSON schema.
     """
@@ -204,24 +221,26 @@ def save_cuboid_data_frame(
     filename: str,
     compression: CompressionOptions = 'gzip',
 ) -> None:
-    """Save the provided pandas DataFrame containing cuboid data to disk.
+    """
+    Save the provided pandas DataFrame containing cuboid data to disk.
 
-    Args:
-    ----
-    df (DataFrame):
+    Parameters
+    ----------
+    df : DataFrame
         The pandas DataFrame containing the cuboid data to save.
-    path (Union[Path, str]):
+    path : Union[Path, str]
         The path to the directory where the cuboid data should be saved.
-    filename (str):
+    filename : str
         The name of the file to which the cuboid data should be saved.
-    compression (CompressionOptions, optional):
+    compression : CompressionOptions, optional
         The compression method to use when saving the data. Valid options
         are 'infer', 'bz2', 'gzip', 'xz', 'zip' and 'zstd'. Defaults to
         'gzip'.
 
-    Returns:
+    Returns
     -------
     None
+        Nothing returned by this function.
     """
     pth = Path(path) / 'annotations/cuboids'
 
