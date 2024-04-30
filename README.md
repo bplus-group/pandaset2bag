@@ -55,7 +55,7 @@
 
 ### Installation
 
-With the use of the Python library [Rosbags](https://gitlab.com/ternaris/rosbags) which does not have any dependencies on the ROS2 software stacks, *pandaset2bag* can be used without the need to install ROS2. *pandaset2bag* requires an installation of Python 3.8+, as well as pip. Other dependencies can be found in the [requirements.txt](https://github.com/bplus-group/pandaset2bag/blob/master/requirements.txt).
+With the use of the Python library [Rosbags](https://gitlab.com/ternaris/rosbags) which does not have any dependencies on the ROS2 software stacks, *pandaset2bag* can be used without the need to install ROS2. *pandaset2bag* requires an installation of Python 3.10+, as well as pip. Other dependencies can be found in the [requirements.txt](https://github.com/bplus-group/pandaset2bag/blob/master/requirements.txt).
 
 To install from source with pip:
 

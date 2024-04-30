@@ -29,6 +29,7 @@ if typing.TYPE_CHECKING:
     from pandas import DataFrame
     from pandas._typing import CompressionOptions
     from pandas._typing import JSONSerializable
+    from rosbags.typesys.stores import Typestore
 
     from .enums import LidarIdentifier
 
@@ -36,11 +37,21 @@ import json
 from importlib.resources import path as resources_path
 from pathlib import Path
 
-from rosbags.typesys.types import sensor_msgs__msg__PointField as PointField
 
+def register_updated_visualization_msgs__msg__Marker(typestore: Typestore) -> None:  # noqa: N802
+    """
+    Update rosbags types with new definition of Marker.msg.
 
-def register_updated_visualization_msgs__msg__Marker() -> None:  # noqa: N802
-    """Update rosbags types with new definition of Marker.msg."""
+    Parameters
+    ----------
+    typestore : Typestore
+        The typestore object to register the new message types with.
+
+    Returns
+    -------
+    None
+        Nothing returned by this function.
+    """
 
     def guess_msgtype(path: Path) -> str:
         """
@@ -62,8 +73,6 @@ def register_updated_visualization_msgs__msg__Marker() -> None:  # noqa: N802
         return str(name)
 
     from rosbags.typesys import get_types_from_msg
-    from rosbags.typesys import register_types
-    from rosbags.typesys.types import FIELDDEFS
 
     package = f'{__package__}.visualization_msgs'
     resources = {'Marker.msg', 'MeshFile.msg', 'UVCoordinate.msg'}
@@ -74,8 +83,8 @@ def register_updated_visualization_msgs__msg__Marker() -> None:  # noqa: N802
             msgdef = fp.read_text(encoding='utf-8')
             msg_types.update(get_types_from_msg(msgdef, guess_msgtype(fp)))
 
-    del FIELDDEFS['visualization_msgs/msg/Marker']
-    register_types(msg_types)
+    del typestore.FIELDDEFS['visualization_msgs/msg/Marker']
+    typestore.register(msg_types)
 
 
 def get_frame_id_from_topic(topic: str, root: str = '/panda', suffix: str = '') -> str:
@@ -154,7 +163,7 @@ def split_unix_timestamp(timestamp: float) -> tuple[int, int]:
     return (sec, nsec)
 
 
-def get_default_lidar_point_fields() -> tuple[list[PointField], int]:
+def get_default_lidar_point_fields(typestore: Typestore) -> tuple[list[type], int]:
     """
     Get default fields for LIDAR point clouds.
 
@@ -170,18 +179,24 @@ def get_default_lidar_point_fields() -> tuple[list[PointField], int]:
         - class_id: integer code representing the type of object the point
           belongs to (e.g. Bus, Car, Ground)
 
+    Parameters
+    ----------
+    typestore : Typestore
+        The typestore object to register the new message types with.
+
     Returns
     -------
-    Tuple[List[PointField], int]
-        - A list of `PointField` objects representing the standard fields used
-            in a LiDAR point cloud.
-        - An integer representing the number of bytes between consecutive
-            points in the point cloud.
+    Tuple[List[type], int]
+        - A list of `PointField` objects representing the standard fields used in a LiDAR point cloud.
+        - An integer representing the number of bytes between consecutive points in the point cloud.
     """
     channels = ('x', 'y', 'z', 'intensity', 'class_id')
 
+    PointField = typestore.types['sensor_msgs/msg/PointField']  # noqa: N806
+
     fields = [
-        PointField(name=name, offset=(i * 4), datatype=PointField.FLOAT32, count=1) for i, name in enumerate(channels)
+        PointField(name=name, offset=(i * 4), datatype=PointField.FLOAT32, count=1)  # type: ignore[attr-defined]
+        for i, name in enumerate(channels)
     ]
 
     point_step = len(fields) * 4
@@ -246,4 +261,4 @@ def save_cuboid_data_frame(
 
     if not pth.exists():
         pth.mkdir(parents=True)
-    df.to_pickle(pth / filename, compression)
+    df.to_pickle(pth / filename, compression=compression)

@@ -1,5 +1,5 @@
 [tool.mypy]
-python_version = '3.8'
+python_version = '3.10'
 
 # Ensure full coverage
 disallow_untyped_calls = true
@@ -32,7 +32,7 @@ follow_imports = 'silent'
 line-length = 120
 indent-width = 4
 
-target-version = 'py38'
+target-version = 'py310'
 
 [tool.ruff.lint]
 select = ['ALL']
@@ -109,7 +109,6 @@ exclude = [ # don't report on checks for these
   '\.__init__$',
   '\.__repr__$',
   '\.__str__$',
-  '(?<=\.)_\w+',            # exclude internals
   '__main__',               # exclude __main__.py
 ]
 override_SS05 = [ # allow docstrings to start with these words

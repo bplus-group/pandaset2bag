@@ -43,41 +43,9 @@ from pandaset import DataSet
 from rich import print
 from rich.console import Console
 from rich.progress import track
-
-if os.getenv('UPDATED_VISUALIZATION_MSG_MARKER', 'false').lower() == 'true':
-    from .utils import register_updated_visualization_msgs__msg__Marker
-
-    register_updated_visualization_msgs__msg__Marker()
-
-    from rosbags.typesys.types import (  # noqa: I001, RUF100, E501
-        visualization_msgs__msg__MeshFile as MeshFile,
-    )
-
-    print('[gold1]█████[/gold1] Using [bold]UPDATED[/bold] visualization_msgs')
-else:
-    print('[gold1]█████[/gold1] Using [bold]DEFAULT[/bold] visualization_msgs')
 from rosbags.rosbag2 import Writer
-from rosbags.serde import serialize_cdr
-from rosbags.typesys.types import builtin_interfaces__msg__Duration as Duration
-from rosbags.typesys.types import builtin_interfaces__msg__Time as Time
-from rosbags.typesys.types import geometry_msgs__msg__Point as Point
-from rosbags.typesys.types import geometry_msgs__msg__Pose as Pose
-from rosbags.typesys.types import geometry_msgs__msg__Quaternion as Quaternion
-from rosbags.typesys.types import geometry_msgs__msg__Transform as Transform
-from rosbags.typesys.types import geometry_msgs__msg__TransformStamped as TransformStamped
-from rosbags.typesys.types import geometry_msgs__msg__Vector3 as Vector3
-from rosbags.typesys.types import sensor_msgs__msg__CameraInfo as CameraInfo
-from rosbags.typesys.types import sensor_msgs__msg__CompressedImage as CompressedImage
-from rosbags.typesys.types import sensor_msgs__msg__Image as Image
-from rosbags.typesys.types import sensor_msgs__msg__NavSatFix as NavSatFix
-from rosbags.typesys.types import sensor_msgs__msg__NavSatStatus as NavSatStatus
-from rosbags.typesys.types import sensor_msgs__msg__PointCloud2 as PointCloud2
-from rosbags.typesys.types import sensor_msgs__msg__RegionOfInterest as RegionOfInterest
-from rosbags.typesys.types import std_msgs__msg__ColorRGBA as ColorRGBA
-from rosbags.typesys.types import std_msgs__msg__Header as Header
-from rosbags.typesys.types import tf2_msgs__msg__TFMessage as TFMessage
-from rosbags.typesys.types import visualization_msgs__msg__Marker as Marker
-from rosbags.typesys.types import visualization_msgs__msg__MarkerArray as MarkerArray
+from rosbags.typesys import Stores
+from rosbags.typesys import get_typestore
 from scipy.spatial.transform import Rotation as R  # noqa: N817
 
 from .enums import CompressedImageFormat
@@ -98,6 +66,43 @@ from .utils import get_frame_id_from_topic
 from .utils import save_cuboid_data_frame
 from .utils import split_unix_timestamp
 from .utils import to_json_with_schema
+
+typestore = get_typestore(Stores.LATEST)
+
+CameraInfo = typestore.types['sensor_msgs/msg/CameraInfo']
+ColorRGBA = typestore.types['std_msgs/msg/ColorRGBA']
+CompressedImage = typestore.types['sensor_msgs/msg/CompressedImage']
+Duration = typestore.types['builtin_interfaces/msg/Duration']
+Header = typestore.types['std_msgs/msg/Header']
+Image = typestore.types['sensor_msgs/msg/Image']
+NavSatFix = typestore.types['sensor_msgs/msg/NavSatFix']
+NavSatStatus = typestore.types['sensor_msgs/msg/NavSatStatus']
+Point = typestore.types['geometry_msgs/msg/Point']
+PointCloud2 = typestore.types['sensor_msgs/msg/PointCloud2']
+PointField = typestore.types['sensor_msgs/msg/PointField']
+Pose = typestore.types['geometry_msgs/msg/Pose']
+Quaternion = typestore.types['geometry_msgs/msg/Quaternion']
+RegionOfInterest = typestore.types['sensor_msgs/msg/RegionOfInterest']
+TFMessage = typestore.types['tf2_msgs/msg/TFMessage']
+Time = typestore.types['builtin_interfaces/msg/Time']
+Transform = typestore.types['geometry_msgs/msg/Transform']
+TransformStamped = typestore.types['geometry_msgs/msg/TransformStamped']
+Vector3 = typestore.types['geometry_msgs/msg/Vector3']
+
+
+if os.getenv('UPDATED_VISUALIZATION_MSG_MARKER', 'false').lower() == 'true':
+    from .utils import register_updated_visualization_msgs__msg__Marker
+
+    register_updated_visualization_msgs__msg__Marker(typestore)
+
+    MeshFile = typestore.types['visualization_msgs/msg/MeshFile']
+
+    print('[gold1]█████[/gold1] Using [bold]UPDATED[/bold] visualization_msgs')
+else:
+    print('[gold1]█████[/gold1] Using [bold]DEFAULT[/bold] visualization_msgs')
+
+Marker = typestore.types['visualization_msgs/msg/Marker']
+MarkerArray = typestore.types['visualization_msgs/msg/MarkerArray']
 
 
 class PandaSet2BagConverter:
@@ -306,6 +311,19 @@ class PandaSet2BagConverter:
         self._save_cuboids_df = value
 
     def _get_offered_qos_profile_str_for(self, topic: str) -> str:
+        """
+        Get the offered QoS profile as a YAML string for the given topic.
+
+        Parameters
+        ----------
+        topic : str
+            The topic for which to retrieve the offered QoS profile.
+
+        Returns
+        -------
+        str
+            The offered QoS profile as a YAML string.
+        """
         offered_qos_profile = self.offered_qos_profiles.get(topic)
         if offered_qos_profile is None:
             return ''
@@ -329,18 +347,19 @@ class PandaSet2BagConverter:
         Returns
         -------
         None
+            Nothing returned by this function.
         """
         topic = f'{self.EGO_NAMESPACE}/{camera_id}/image'
         offered_qos_profile = self._get_offered_qos_profile_str_for(topic)
         conn = self._rosbag_writer.add_connection(
             topic,
-            Image.__msgtype__,
+            Image.__msgtype__,  # type: ignore[attr-defined]
             offered_qos_profiles=offered_qos_profile,
         )
 
         camera = self._sequence.camera[camera_id]
 
-        for img, timestamp in zip(camera, camera.timestamps):
+        for img, timestamp in zip(camera, camera.timestamps, strict=False):
             if self.max_image_size is not None and all(self.max_image_size):
                 img.thumbnail(self.max_image_size)
 
@@ -362,7 +381,7 @@ class PandaSet2BagConverter:
             self._rosbag_writer.write(
                 conn,
                 timestamp * 1e9,
-                serialize_cdr(message, message.__msgtype__),
+                typestore.serialize_cdr(message, message.__msgtype__),
             )
 
     def _convert_camera_image_to_compressed_topic(self, camera_id: str) -> None:
@@ -379,18 +398,20 @@ class PandaSet2BagConverter:
         Returns
         -------
         None
+            Nothing returned by this function.
         """
         topic = f'{self.EGO_NAMESPACE}/{camera_id}/image/compressed'
         offered_qos_profile = self._get_offered_qos_profile_str_for(topic)
         conn = self._rosbag_writer.add_connection(
             topic,
-            CompressedImage.__msgtype__,
+            CompressedImage.__msgtype__,  # type: ignore[attr-defined]
+            typestore=typestore,
             offered_qos_profiles=offered_qos_profile,
         )
 
         camera = self._sequence.camera[camera_id]
 
-        for img, timestamp in zip(camera, camera.timestamps):
+        for img, timestamp in zip(camera, camera.timestamps, strict=False):
             if self.max_image_size is not None and all(self.max_image_size):
                 img.thumbnail(self.max_image_size)
 
@@ -420,7 +441,7 @@ class PandaSet2BagConverter:
             self._rosbag_writer.write(
                 conn,
                 timestamp * 1e9,
-                serialize_cdr(message, message.__msgtype__),
+                typestore.serialize_cdr(message, message.__msgtype__),
             )
 
     def _convert_camera_info_to_topic(self, camera_id: str) -> None:
@@ -435,12 +456,14 @@ class PandaSet2BagConverter:
         Returns
         -------
         None
+            Nothing returned by this function.
         """
         topic = f'{self.EGO_NAMESPACE}/{camera_id}/camera_info'
         offered_qos_profile = self._get_offered_qos_profile_str_for(topic)
         conn = self._rosbag_writer.add_connection(
             topic,
-            CameraInfo.__msgtype__,
+            CameraInfo.__msgtype__,  # type: ignore[attr-defined]
+            typestore=typestore,
             offered_qos_profiles=offered_qos_profile,
         )
 
@@ -451,7 +474,7 @@ class PandaSet2BagConverter:
 
         d, k, r, p = get_flatten_calibration_matrices(camera.intrinsics, imgsz)
 
-        for img, timestamp in zip(camera, camera.timestamps):
+        for img, timestamp in zip(camera, camera.timestamps, strict=False):
             sec, nsec = split_unix_timestamp(timestamp)
 
             message = CameraInfo(
@@ -480,7 +503,7 @@ class PandaSet2BagConverter:
             self._rosbag_writer.write(
                 conn,
                 timestamp * 1e9,
-                serialize_cdr(message, message.__msgtype__),
+                typestore.serialize_cdr(message, message.__msgtype__),
             )
 
     def _convert_cameras(self) -> None:
@@ -490,6 +513,7 @@ class PandaSet2BagConverter:
         Returns
         -------
         None
+            Nothing returned by this function.
         """
         for camera_id in track(
             self._sequence.camera.keys(),
@@ -516,17 +540,19 @@ class PandaSet2BagConverter:
         Returns
         -------
         None
+            Nothing returned by this function.
         """
         topic = f'{self.EGO_NAMESPACE}/gnss'
         offered_qos_profile = self._get_offered_qos_profile_str_for(topic)
         conn = self._rosbag_writer.add_connection(
             topic,
-            NavSatFix.__msgtype__,
+            NavSatFix.__msgtype__,  # type: ignore[attr-defined]
+            typestore=typestore,
             offered_qos_profiles=offered_qos_profile,
         )
 
         for gps, timestamp in track(
-            zip(self._sequence.gps, self._sequence.timestamps),
+            zip(self._sequence.gps, self._sequence.timestamps, strict=False),
             description='Converting GPS...',
             total=len(self._sequence.gps.data),
         ):
@@ -548,7 +574,7 @@ class PandaSet2BagConverter:
             self._rosbag_writer.write(
                 conn,
                 timestamp * 1e9,
-                serialize_cdr(message, message.__msgtype__),
+                typestore.serialize_cdr(message, message.__msgtype__),
             )
 
     def _convert_lidar_to_topic(self, lidar_id: LidarIdentifier) -> None:
@@ -563,6 +589,7 @@ class PandaSet2BagConverter:
         Returns
         -------
         None
+            Nothing returned by this function.
         """
         lidar_name = format_lidar_name_from_id(lidar_id)
 
@@ -570,7 +597,8 @@ class PandaSet2BagConverter:
         offered_qos_profile = self._get_offered_qos_profile_str_for(topic)
         conn = self._rosbag_writer.add_connection(
             topic,
-            PointCloud2.__msgtype__,
+            PointCloud2.__msgtype__,  # type: ignore[attr-defined]
+            typestore=typestore,
             offered_qos_profiles=offered_qos_profile,
         )
 
@@ -578,13 +606,13 @@ class PandaSet2BagConverter:
         lidar = self._sequence.lidar
 
         for idx, (data_frame, pose, timestamp) in track(
-            enumerate(zip(lidar.data, lidar.poses, lidar.timestamps)),
+            enumerate(zip(lidar.data, lidar.poses, lidar.timestamps, strict=False)),
             description=f'Converting {lidar_name} lidar...',
             total=len(lidar.data),
         ):
             sec, nsec = split_unix_timestamp(timestamp)
             frame_width = len(data_frame.index)
-            fields, point_step = get_default_lidar_point_fields()
+            fields, point_step = get_default_lidar_point_fields(typestore=typestore)
 
             df: pd.DataFrame
             if self._sequence.semseg is not None:
@@ -616,7 +644,7 @@ class PandaSet2BagConverter:
             self._rosbag_writer.write(
                 conn,
                 timestamp * 1e9,
-                serialize_cdr(message, message.__msgtype__),
+                typestore.serialize_cdr(message, message.__msgtype__),
             )
 
     def _convert_lidars(self) -> None:
@@ -626,16 +654,26 @@ class PandaSet2BagConverter:
         Returns
         -------
         None
+            Nothing returned by this function.
         """
         for lidar_id in LidarIdentifier:
             self._convert_lidar_to_topic(lidar_id)
 
     def _convert_cuboids_to_topic(self) -> None:
+        """
+        Convert cuboids to a ROS topic.
+
+        Returns
+        -------
+        None
+            Nothing returned by this function.
+        """
         topic = '/panda/markers'
         offered_qos_profile = self._get_offered_qos_profile_str_for(topic)
         conn = self._rosbag_writer.add_connection(
             topic,
-            MarkerArray.__msgtype__,
+            MarkerArray.__msgtype__,  # type: ignore[attr-defined]
+            typestore=typestore,
             offered_qos_profiles=offered_qos_profile,
         )
         table_schema = None
@@ -646,6 +684,7 @@ class PandaSet2BagConverter:
                     self._sequence.lidar.poses,
                     self._sequence.cuboids,
                     self._sequence.timestamps,
+                    strict=False,
                 ),
             ),
             description='Converting cuboids...',
@@ -660,7 +699,7 @@ class PandaSet2BagConverter:
                 path = self._rosbag_writer.path
                 save_cuboid_data_frame(df, path, f'{str(idx).zfill(2)}.pkl.gz')
 
-            markers: list[Marker] = []
+            markers: list[type] = []
             marker_ids: list[str] = []
 
             sec, nsec = split_unix_timestamp(timestamp)
@@ -676,8 +715,8 @@ class PandaSet2BagConverter:
                     ),
                     'ns': '',
                     'id': marker_ids.index(row.uuid),
-                    'type': Marker.CUBE,
-                    'action': Marker.MODIFY,
+                    'type': Marker.CUBE,  # type: ignore[attr-defined]
+                    'action': Marker.MODIFY,  # type: ignore[attr-defined]
                     'pose': Pose(
                         Point(*row[6:9]),
                         Quaternion(*R.from_euler('zyx', [row.yaw, 0, 0]).as_quat()),
@@ -719,14 +758,27 @@ class PandaSet2BagConverter:
             self._rosbag_writer.write(
                 conn,
                 timestamp * 1e9,
-                serialize_cdr(message, message.__msgtype__),
+                typestore.serialize_cdr(message, message.__msgtype__),
             )
 
     def _generate_stamped_transform_ego_vehicle(self, connection: Connection) -> None:
+        """
+        Generate stamped transform for the ego vehicle.
+
+        Parameters
+        ----------
+        connection : Connection
+            The connection to write the transform message to.
+
+        Returns
+        -------
+        None
+            Nothing returned by this function.
+        """
         lidar = self._sequence.lidar
 
         for pose, timestamp in track(
-            zip(lidar.poses, lidar.timestamps),
+            zip(lidar.poses, lidar.timestamps, strict=False),
             description='Generating /tf for ego_vehicle...',
             total=len(self._sequence.lidar.poses),
         ):
@@ -756,7 +808,7 @@ class PandaSet2BagConverter:
             self._rosbag_writer.write(
                 connection,
                 timestamp * 1e9,
-                serialize_cdr(message, message.__msgtype__),
+                typestore.serialize_cdr(message, message.__msgtype__),
             )
 
     def _generate_stamped_transform_lidar(
@@ -764,6 +816,21 @@ class PandaSet2BagConverter:
         lidar_id: LidarIdentifier,
         connection: Connection,
     ) -> None:
+        """
+        Generate stamped transform for a lidar.
+
+        Parameters
+        ----------
+        lidar_id : LidarIdentifier
+            The identifier of the lidar.
+        connection : Connection
+            The connection to write the transform message.
+
+        Returns
+        -------
+        None
+            Nothing returned by this function.
+        """
         lidar_name = format_lidar_name_from_id(lidar_id)
 
         for timestamp in track(
@@ -796,7 +863,7 @@ class PandaSet2BagConverter:
             self._rosbag_writer.write(
                 connection,
                 timestamp * 1e9,
-                serialize_cdr(message, message.__msgtype__),
+                typestore.serialize_cdr(message, message.__msgtype__),
             )
 
     def _generate_stamped_transform_camera(
@@ -804,11 +871,26 @@ class PandaSet2BagConverter:
         camera_id: str,
         connection: Connection,
     ) -> None:
+        """
+        Generate stamped transform for a camera.
+
+        Parameters
+        ----------
+        camera_id : str
+            The ID of the camera.
+        connection : Connection
+            The connection to write the transform message to.
+
+        Returns
+        -------
+        None
+            Nothing returned by this function.
+        """
         lidar = self._sequence.lidar
         camera = self._sequence.camera[camera_id]
 
         for lidar_pose, camera_pose, timestamp in track(
-            zip(lidar.poses, camera.poses, camera.timestamps),
+            zip(lidar.poses, camera.poses, camera.timestamps, strict=False),
             description=f'Generating /tf for {camera_id}...',
             total=len(lidar.poses),
         ):
@@ -845,15 +927,24 @@ class PandaSet2BagConverter:
             self._rosbag_writer.write(
                 connection,
                 timestamp * 1e9,
-                serialize_cdr(message, message.__msgtype__),
+                typestore.serialize_cdr(message, message.__msgtype__),
             )
 
     def _convert_tf_sensors(self) -> None:
+        """
+        Convert TF sensors to ROS messages and adds them to the rosbag.
+
+        Returns
+        -------
+        None
+            Nothing returned by this function.
+        """
         topic = '/tf'
         offered_qos_profile = self._get_offered_qos_profile_str_for(topic)
         tf_connection: Connection = self._rosbag_writer.add_connection(
             topic,
-            TFMessage.__msgtype__,
+            TFMessage.__msgtype__,  # type: ignore[attr-defined]
+            typestore=typestore,
             offered_qos_profiles=offered_qos_profile,
         )
 

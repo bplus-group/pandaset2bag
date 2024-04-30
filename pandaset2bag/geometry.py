@@ -24,7 +24,6 @@
 from __future__ import annotations
 
 import typing
-from typing import Dict
 from typing import NewType
 
 if typing.TYPE_CHECKING:
@@ -36,7 +35,7 @@ import numpy as np
 from pandaset.geometry import lidar_points_to_ego
 from scipy.spatial.transform import Rotation as R  # noqa: N817
 
-Pose = NewType('Pose', Dict[str, Dict[str, float]])
+Pose = NewType('Pose', dict[str, dict[str, float]])
 """
 Pose dictionary. The dictionary keys return the following types:
 

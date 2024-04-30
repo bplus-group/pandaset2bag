@@ -29,7 +29,7 @@ setup(
     license='MIT',
     packages=[PACKAGE_NAME],
     package_dir={PACKAGE_NAME: PACKAGE_NAME},
-    python_requires='>=3.8',
+    python_requires='>=3.10',
     install_requires=requirements,
     include_package_data=True,
     entry_points={
