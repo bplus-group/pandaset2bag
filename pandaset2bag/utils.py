@@ -29,6 +29,7 @@ if typing.TYPE_CHECKING:
     from pandas import DataFrame
     from pandas._typing import CompressionOptions
     from pandas._typing import JSONSerializable
+    from rosbags.typesys.store import MsgType
     from rosbags.typesys.stores import Typestore
 
     from .enums import LidarIdentifier
@@ -83,7 +84,7 @@ def register_updated_visualization_msgs__msg__Marker(typestore: Typestore) -> No
             msgdef = fp.read_text(encoding='utf-8')
             msg_types.update(get_types_from_msg(msgdef, guess_msgtype(fp)))
 
-    del typestore.FIELDDEFS['visualization_msgs/msg/Marker']
+    del typestore.fielddefs['visualization_msgs/msg/Marker']
     typestore.register(msg_types)
 
 
@@ -163,7 +164,7 @@ def split_unix_timestamp(timestamp: float) -> tuple[int, int]:
     return (sec, nsec)
 
 
-def get_default_lidar_point_fields(typestore: Typestore) -> tuple[list[type], int]:
+def get_default_lidar_point_fields(typestore: Typestore) -> tuple[list[MsgType], int]:
     """
     Get default fields for LIDAR point clouds.
 
@@ -186,7 +187,7 @@ def get_default_lidar_point_fields(typestore: Typestore) -> tuple[list[type], in
 
     Returns
     -------
-    Tuple[List[type], int]
+    Tuple[List[MsgType], int]
         - A list of `PointField` objects representing the standard fields used in a LiDAR point cloud.
         - An integer representing the number of bytes between consecutive points in the point cloud.
     """

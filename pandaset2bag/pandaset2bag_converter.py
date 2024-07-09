@@ -35,6 +35,7 @@ if typing.TYPE_CHECKING:
 
     from pandaset.sequence import Sequence
     from rosbags.interfaces import Connection
+    from rosbags.typesys.store import MsgType
 
 import numpy as np
 import pandas as pd
@@ -353,7 +354,7 @@ class PandaSet2BagConverter:
         offered_qos_profile = self._get_offered_qos_profile_str_for(topic)
         conn = self._rosbag_writer.add_connection(
             topic,
-            Image.__msgtype__,  # type: ignore[attr-defined]
+            Image.__msgtype__,
             offered_qos_profiles=offered_qos_profile,
         )
 
@@ -404,7 +405,7 @@ class PandaSet2BagConverter:
         offered_qos_profile = self._get_offered_qos_profile_str_for(topic)
         conn = self._rosbag_writer.add_connection(
             topic,
-            CompressedImage.__msgtype__,  # type: ignore[attr-defined]
+            CompressedImage.__msgtype__,
             typestore=typestore,
             offered_qos_profiles=offered_qos_profile,
         )
@@ -462,7 +463,7 @@ class PandaSet2BagConverter:
         offered_qos_profile = self._get_offered_qos_profile_str_for(topic)
         conn = self._rosbag_writer.add_connection(
             topic,
-            CameraInfo.__msgtype__,  # type: ignore[attr-defined]
+            CameraInfo.__msgtype__,
             typestore=typestore,
             offered_qos_profiles=offered_qos_profile,
         )
@@ -546,7 +547,7 @@ class PandaSet2BagConverter:
         offered_qos_profile = self._get_offered_qos_profile_str_for(topic)
         conn = self._rosbag_writer.add_connection(
             topic,
-            NavSatFix.__msgtype__,  # type: ignore[attr-defined]
+            NavSatFix.__msgtype__,
             typestore=typestore,
             offered_qos_profiles=offered_qos_profile,
         )
@@ -597,7 +598,7 @@ class PandaSet2BagConverter:
         offered_qos_profile = self._get_offered_qos_profile_str_for(topic)
         conn = self._rosbag_writer.add_connection(
             topic,
-            PointCloud2.__msgtype__,  # type: ignore[attr-defined]
+            PointCloud2.__msgtype__,
             typestore=typestore,
             offered_qos_profiles=offered_qos_profile,
         )
@@ -672,7 +673,7 @@ class PandaSet2BagConverter:
         offered_qos_profile = self._get_offered_qos_profile_str_for(topic)
         conn = self._rosbag_writer.add_connection(
             topic,
-            MarkerArray.__msgtype__,  # type: ignore[attr-defined]
+            MarkerArray.__msgtype__,
             typestore=typestore,
             offered_qos_profiles=offered_qos_profile,
         )
@@ -699,7 +700,7 @@ class PandaSet2BagConverter:
                 path = self._rosbag_writer.path
                 save_cuboid_data_frame(df, path, f'{str(idx).zfill(2)}.pkl.gz')
 
-            markers: list[type] = []
+            markers: list[MsgType] = []
             marker_ids: list[str] = []
 
             sec, nsec = split_unix_timestamp(timestamp)
@@ -943,7 +944,7 @@ class PandaSet2BagConverter:
         offered_qos_profile = self._get_offered_qos_profile_str_for(topic)
         tf_connection: Connection = self._rosbag_writer.add_connection(
             topic,
-            TFMessage.__msgtype__,  # type: ignore[attr-defined]
+            TFMessage.__msgtype__,
             typestore=typestore,
             offered_qos_profiles=offered_qos_profile,
         )
@@ -967,7 +968,7 @@ class PandaSet2BagConverter:
         path : Union[Path, str], optional
             The save path of the rosbag file. Default is '', i.e the
             rosbag file will be saved in the current working directory
-            with the name 'pandaset_{sequence_id}'.
+            with the name 'pandasetbag_{sequence_id}'.
 
         Returns
         -------
