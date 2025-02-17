@@ -430,11 +430,8 @@ def cuboid_data_frame_to_normative_ego(
 
     M_cuboid_poses = [
         heading_position_to_mat(
-            np.roll(
-                R.from_euler('zyx', [row[3], 0, 0]).as_quat(),
-                1,
-            ).tolist(),  # IMPROVE: drop np.roll for performance improvements
-            row[6:9],
+            R.from_euler('zyx', [float(row[3]), 0, 0]).as_quat().tolist(),
+            [float(x) for x in row[6:9]],
         )
         for row in cuboid_df.itertuples()
     ]
