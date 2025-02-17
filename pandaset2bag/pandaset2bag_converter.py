@@ -41,7 +41,7 @@ import numpy as np
 import pandas as pd
 from pandas.io.json import build_table_schema
 from pandaset import DataSet
-from rich import print
+from rich import print as rprint
 from rich.console import Console
 from rich.progress import track
 from rosbags.rosbag2 import Writer
@@ -98,9 +98,9 @@ if os.getenv('UPDATED_VISUALIZATION_MSG_MARKER', 'false').lower() == 'true':
 
     MeshFile = typestore.types['visualization_msgs/msg/MeshFile']
 
-    print('[gold1]█████[/gold1] Using [bold]UPDATED[/bold] visualization_msgs')
+    rprint('[gold1]█████[/gold1] Using [bold]UPDATED[/bold] visualization_msgs')
 else:
-    print('[gold1]█████[/gold1] Using [bold]DEFAULT[/bold] visualization_msgs')
+    rprint('[gold1]█████[/gold1] Using [bold]DEFAULT[/bold] visualization_msgs')
 
 Marker = typestore.types['visualization_msgs/msg/Marker']
 MarkerArray = typestore.types['visualization_msgs/msg/MarkerArray']
