@@ -30,7 +30,7 @@ if typing.TYPE_CHECKING:
     from pandas._typing import CompressionOptions
     from pandas._typing import JSONSerializable
     from rosbags.typesys.store import MsgType
-    from rosbags.typesys.stores import Typestore
+    from rosbags.typesys.store import Typestore
 
     from .enums import LidarIdentifier
 
