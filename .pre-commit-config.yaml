@@ -1,6 +1,6 @@
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.6.0
+    rev: v5.0.0
     hooks:
       - id: check-added-large-files
       - id: check-json
@@ -11,7 +11,7 @@ repos:
       - id: requirements-txt-fixer
       - id: trailing-whitespace
   - repo: https://github.com/charliermarsh/ruff-pre-commit
-    rev: v0.5.1
+    rev: v0.9.6
     hooks:
       - id: ruff
         args: [--fix]
@@ -20,16 +20,16 @@ repos:
     hooks:
       - id: add-trailing-comma
   - repo: https://github.com/asottile/pyupgrade
-    rev: v3.16.0
+    rev: v3.19.1
     hooks:
       - id: pyupgrade
         args: [--py310-plus]
   - repo: https://github.com/pre-commit/mirrors-mypy
-    rev: v1.10.1
+    rev: v1.15.0
     hooks:
       - id: mypy
-        additional_dependencies: [types-requests]
+        additional_dependencies: [rosbags==0.10.7, types-PyYAML]
   - repo: https://github.com/numpy/numpydoc
-    rev: v1.7.0
+    rev: v1.8.0
     hooks:
       - id: numpydoc-validation
