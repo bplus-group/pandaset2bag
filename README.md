@@ -53,6 +53,14 @@
 
 > [!TIP]
 > The [PandaSet](https://pandaset.org/) dataset is no longer available for download from the official website (see issues [#104](https://github.com/scaleapi/pandaset-devkit/issues/104) and [#151](https://github.com/scaleapi/pandaset-devkit/issues/151) for details). However, you can still access the dataset through alternative sources, such as [Kaggle](https://www.kaggle.com/datasets/usharengaraju/pandaset-dataset/data).
+> <br><br>
+> **Note**: The dataset structure on Kaggle is different from the original one.
+> Use
+> ```bash
+> export FROM_KAGGLE=true
+> ```
+> to ensure that the converter uses the correct file structure.
+
 
 ## Quickstart
 

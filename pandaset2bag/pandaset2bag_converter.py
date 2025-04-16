@@ -105,6 +105,16 @@ else:
 Marker = typestore.types['visualization_msgs/msg/Marker']
 MarkerArray = typestore.types['visualization_msgs/msg/MarkerArray']
 
+# Monkey patch the file extension from pkl.gz to pkl to support Dataset format from Kaggle
+# e.g.: https://www.kaggle.com/datasets/usharengaraju/pandaset-dataset
+if os.getenv('FROM_KAGGLE', 'false').lower() == 'true':
+    from pandaset.annotations import Cuboids
+    from pandaset.annotations import SemanticSegmentation
+    from pandaset.sensors import Lidar
+
+    for cls in (Cuboids, Lidar, SemanticSegmentation):
+        cls._data_file_extension = property(lambda _: 'pkl')
+
 
 class PandaSet2BagConverter:
     """
